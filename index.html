@@ -1,0 +1,4538 @@
+<!doctype html>
+<html lang="id">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width,initial-scale=1" />
+    <meta name="color-scheme" content="light" />
+    <title>Project CotSin — Workforce Transition Cockpit</title>
+    <style>
+      :root {
+        --teal: #2b59c3;
+        --teal-d: #1a3575;
+        --teal-soft: #eaf8f8;
+        --yellow: #fbc037;
+        --yellow-soft: #fff8e2;
+        --red: #e11428;
+        --red-soft: #fdedef;
+        --ink: #0b1732;
+        --muted: #718388;
+        --line: #e2eaec;
+        --soft: #f7fafa;
+        --white: #fff;
+        --shadow: 0 14px 40px rgba(23, 52, 59, 0.09);
+        --r: 16px;
+      }
+      * {
+        box-sizing: border-box;
+      }
+      html {
+        scroll-behavior: smooth;
+      }
+      body {
+        margin: 0;
+        background: #fff;
+        color: var(--ink);
+        font-family:
+          Inter,
+          ui-sans-serif,
+          system-ui,
+          -apple-system,
+          BlinkMacSystemFont,
+          "Segoe UI",
+          sans-serif;
+        line-height: 1.4;
+      }
+      button,
+      input,
+      select {
+        font: inherit;
+      }
+      button {
+        cursor: pointer;
+      }
+      .app {
+        display: grid;
+        grid-template-columns: 230px minmax(0, 1fr);
+        min-height: 100vh;
+      }
+      .sidebar {
+        height: 100vh;
+        position: sticky;
+        top: 0;
+        border-right: 1px solid var(--line);
+        padding: 22px 14px;
+        background: #fff;
+        display: flex;
+        flex-direction: column;
+        z-index: 30;
+      }
+      .brand {
+        display: flex;
+        align-items: center;
+        gap: 10px;
+        padding: 2px 7px 18px;
+      }
+      .mark {
+        width: 38px;
+        height: 38px;
+        border-radius: 11px;
+        background: var(--teal);
+        position: relative;
+      }
+      .mark:before,
+      .mark:after {
+        content: "";
+        position: absolute;
+        left: 9px;
+        height: 5px;
+        border-radius: 9px;
+        background: #fff;
+      }
+      .mark:before {
+        top: 10px;
+        width: 20px;
+      }
+      .mark:after {
+        top: 22px;
+        width: 13px;
+      }
+      .brand b {
+        display: block;
+        font-size: 13px;
+      }
+      .brand small {
+        font-size: 9px;
+        color: var(--muted);
+      }
+      .project-card {
+        border: 1px solid var(--line);
+        background: var(--soft);
+        border-radius: 13px;
+        padding: 11px;
+        margin: 0 5px 17px;
+      }
+      .project-card .top {
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+      }
+      .project-card b {
+        font-size: 11px;
+      }
+      .project-card span {
+        font-size: 9px;
+        color: var(--muted);
+      }
+      .mini-track {
+        height: 5px;
+        background: #e8eeee;
+        border-radius: 20px;
+        overflow: hidden;
+        margin: 8px 0 5px;
+      }
+      .mini-fill {
+        height: 100%;
+        background: var(--teal);
+        border-radius: 20px;
+      }
+      .nav-label {
+        font-size: 9px;
+        font-weight: 900;
+        letter-spacing: 0.12em;
+        text-transform: uppercase;
+        color: #9aa9ad;
+        margin: 10px 9px 5px;
+      }
+      .nav {
+        display: grid;
+        gap: 4px;
+      }
+      .nav button {
+        border: 0;
+        background: transparent;
+        color: #596f75;
+        border-radius: 10px;
+        padding: 10px 11px;
+        text-align: left;
+        font-size: 11px;
+        font-weight: 800;
+        display: flex;
+        align-items: center;
+        gap: 9px;
+      }
+      .nav button:hover {
+        background: #f5f9f9;
+      }
+      .nav button.active {
+        background: var(--teal-soft);
+        color: var(--teal-d);
+      }
+      .dot {
+        width: 7px;
+        height: 7px;
+        border: 2px solid currentColor;
+        border-radius: 50%;
+      }
+      .nav button.active .dot {
+        background: currentColor;
+      }
+      .side-foot {
+        margin-top: auto;
+        padding: 10px 7px 0;
+      }
+      .sync {
+        font-size: 9px;
+        color: var(--muted);
+        line-height: 1.5;
+      }
+      .sync b {
+        color: var(--ink);
+      }
+      .main {
+        min-width: 0;
+      }
+      .topbar {
+        height: 66px;
+        position: sticky;
+        top: 0;
+        z-index: 20;
+        background: rgba(255, 255, 255, 0.96);
+        backdrop-filter: blur(9px);
+        border-bottom: 1px solid var(--line);
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+        gap: 16px;
+        padding: 0 28px;
+      }
+      .context b {
+        font-size: 12px;
+        display: block;
+      }
+      .context span {
+        font-size: 9px;
+        color: var(--muted);
+      }
+      .top-actions {
+        display: flex;
+        align-items: center;
+        gap: 8px;
+      }
+      .select,
+      .btn {
+        border: 1px solid var(--line);
+        background: #fff;
+        color: var(--ink);
+        border-radius: 9px;
+        padding: 8px 10px;
+        font-size: 10px;
+        font-weight: 800;
+      }
+      .btn.primary {
+        background: var(--teal);
+        border-color: var(--teal);
+        color: #fff;
+      }
+      .btn.ghost:hover,
+      .select:hover {
+        border-color: #c5d4d7;
+      }
+      .menu {
+        display: none;
+      }
+      .content {
+        max-width: 1360px;
+        margin: auto;
+        padding: 26px;
+      }
+      .screen {
+        display: none;
+      }
+      .screen.active {
+        display: block;
+        animation: fade 0.18s ease;
+      }
+      @keyframes fade {
+        from {
+          opacity: 0.35;
+          transform: translateY(3px);
+        }
+        to {
+          opacity: 1;
+          transform: none;
+        }
+      }
+      .page-head {
+        display: flex;
+        align-items: flex-end;
+        justify-content: space-between;
+        gap: 16px;
+        margin-bottom: 17px;
+      }
+      .page-head h1 {
+        margin: 0;
+        font-size: 27px;
+        letter-spacing: -0.035em;
+      }
+      .page-head .meta {
+        font-size: 10px;
+        color: var(--muted);
+      }
+      .grid {
+        display: grid;
+        gap: 12px;
+      }
+      .g2 {
+        grid-template-columns: repeat(2, minmax(0, 1fr));
+      }
+      .g3 {
+        grid-template-columns: repeat(3, minmax(0, 1fr));
+      }
+      .g4 {
+        grid-template-columns: repeat(4, minmax(0, 1fr));
+      }
+      .g6 {
+        grid-template-columns: repeat(6, minmax(0, 1fr));
+      }
+      .card {
+        border: 1px solid var(--line);
+        border-radius: var(--r);
+        padding: 16px;
+        background: #fff;
+      }
+      .card.soft {
+        background: var(--soft);
+      }
+      .card.teal {
+        background: var(--teal-soft);
+        border-color: #cbeaec;
+      }
+      .card.yellow {
+        background: var(--yellow-soft);
+        border-color: #f1dfa6;
+      }
+      .card.red {
+        background: var(--red-soft);
+        border-color: #efcbd0;
+      }
+      .label {
+        font-size: 9px;
+        text-transform: uppercase;
+        letter-spacing: 0.065em;
+        color: var(--muted);
+        font-weight: 900;
+      }
+      .metric {
+        font-size: 28px;
+        font-weight: 950;
+        letter-spacing: -0.045em;
+        line-height: 1.08;
+        margin-top: 6px;
+      }
+      .metric.sm {
+        font-size: 23px;
+      }
+      .sub {
+        font-size: 9px;
+        color: var(--muted);
+        margin-top: 5px;
+      }
+      .tag {
+        display: inline-flex;
+        align-items: center;
+        border-radius: 999px;
+        padding: 4px 7px;
+        font-size: 8px;
+        font-weight: 900;
+        white-space: nowrap;
+      }
+      .tag.good {
+        background: var(--teal-soft);
+        color: var(--teal-d);
+      }
+      .tag.warn {
+        background: var(--yellow-soft);
+        color: #806000;
+      }
+      .tag.risk {
+        background: var(--red-soft);
+        color: #a50e1c;
+      }
+      .tag.gray {
+        background: #f1f4f4;
+        color: #60747a;
+      }
+      .progress {
+        height: 7px;
+        background: #edf2f3;
+        border-radius: 50px;
+        overflow: hidden;
+        margin-top: 10px;
+      }
+      .progress > i {
+        display: block;
+        height: 100%;
+        background: var(--teal);
+        border-radius: 50px;
+      }
+      .progress > i.warn {
+        background: var(--yellow);
+      }
+      .progress > i.risk {
+        background: var(--red);
+      }
+      .kpi-strip {
+        display: grid;
+        grid-template-columns: 1.1fr 1fr 1fr 1.25fr;
+        gap: 12px;
+        margin-bottom: 12px;
+      }
+      .deadline {
+        display: grid;
+        grid-template-columns: auto 1fr;
+        gap: 14px;
+        align-items: center;
+      }
+      .ring {
+        width: 66px;
+        height: 66px;
+        border-radius: 50%;
+        display: grid;
+        place-items: center;
+        background: conic-gradient(var(--yellow) 0 64%, #edf2f3 64% 100%);
+        position: relative;
+      }
+      .ring:after {
+        content: "";
+        position: absolute;
+        inset: 7px;
+        border-radius: 50%;
+        background: #fff;
+      }
+      .ring strong {
+        z-index: 1;
+        font-size: 17px;
+      }
+      .target-grid {
+        display: grid;
+        grid-template-columns: repeat(6, minmax(0, 1fr));
+        gap: 10px;
+      }
+      .target {
+        border: 1px solid var(--line);
+        border-radius: 13px;
+        padding: 12px;
+        min-height: 122px;
+      }
+      .target-head {
+        display: flex;
+        justify-content: space-between;
+        align-items: flex-start;
+        gap: 7px;
+      }
+      .target b {
+        font-size: 10px;
+      }
+      .target .value {
+        font-size: 22px;
+        font-weight: 950;
+        letter-spacing: -0.035em;
+        margin-top: 10px;
+      }
+      .target small {
+        font-size: 8px;
+        color: var(--muted);
+        display: block;
+        margin-top: 4px;
+      }
+      .section-title {
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        gap: 10px;
+        margin: 18px 0 10px;
+      }
+      .section-title h2 {
+        font-size: 14px;
+        margin: 0;
+      }
+      .section-title span {
+        font-size: 9px;
+        color: var(--muted);
+      }
+      .alerts {
+        display: grid;
+        grid-template-columns: repeat(3, minmax(0, 1fr));
+        gap: 10px;
+      }
+      .alert {
+        border: 1px solid var(--line);
+        border-radius: 12px;
+        padding: 12px;
+        display: flex;
+        gap: 10px;
+        align-items: flex-start;
+      }
+      .alert .ico {
+        width: 26px;
+        height: 26px;
+        border-radius: 8px;
+        display: grid;
+        place-items: center;
+        background: var(--yellow-soft);
+        font-size: 11px;
+        font-weight: 900;
+      }
+      .alert.risk .ico {
+        background: var(--red-soft);
+        color: var(--red);
+      }
+      .alert.good .ico {
+        background: var(--teal-soft);
+        color: var(--teal-d);
+      }
+      .alert b {
+        font-size: 10px;
+      }
+      .alert p {
+        font-size: 9px;
+        color: var(--muted);
+        margin: 3px 0 0;
+      }
+      .table-wrap {
+        overflow: auto;
+        border: 1px solid var(--line);
+        border-radius: 14px;
+      }
+      .table {
+        width: 100%;
+        border-collapse: collapse;
+        min-width: 840px;
+      }
+      .table th {
+        font-size: 8px;
+        text-transform: uppercase;
+        letter-spacing: 0.055em;
+        color: var(--muted);
+        background: #f9fbfb;
+        padding: 10px;
+        text-align: left;
+        border-bottom: 1px solid var(--line);
+      }
+      .table td {
+        font-size: 10px;
+        padding: 11px 10px;
+        border-bottom: 1px solid #edf2f3;
+        vertical-align: middle;
+      }
+      .table tr:last-child td {
+        border-bottom: 0;
+      }
+      .table tr.click {
+        cursor: pointer;
+      }
+      .table tr.click:hover td {
+        background: #fbfdfd;
+      }
+      .role-name {
+        font-weight: 850;
+      }
+      .bar {
+        height: 7px;
+        background: #edf2f3;
+        border-radius: 50px;
+        overflow: hidden;
+      }
+      .bar i {
+        display: block;
+        height: 100%;
+        border-radius: 50px;
+        background: var(--teal);
+      }
+      .bar i.high {
+        background: var(--red);
+      }
+      .bar i.med {
+        background: var(--yellow);
+      }
+      .split {
+        display: grid;
+        grid-template-columns: minmax(0, 1.6fr) minmax(310px, 0.8fr);
+        gap: 12px;
+      }
+      .detail {
+        position: sticky;
+        top: 82px;
+      }
+      .detail h3 {
+        font-size: 15px;
+        margin: 0;
+      }
+      .detail .big {
+        font-size: 36px;
+        font-weight: 950;
+        letter-spacing: -0.05em;
+        margin: 8px 0;
+      }
+      .kv {
+        display: grid;
+        grid-template-columns: 1fr auto;
+        gap: 8px;
+        padding: 9px 0;
+        border-bottom: 1px solid #edf2f3;
+      }
+      .kv:last-child {
+        border: 0;
+      }
+      .kv span {
+        font-size: 9px;
+        color: var(--muted);
+      }
+      .kv b {
+        font-size: 10px;
+      }
+      .selected-row td {
+        background: #f2fbfb !important;
+      }
+      .cohort-strip {
+        display: grid;
+        grid-template-columns: repeat(4, 1fr);
+        gap: 10px;
+      }
+      .cohort {
+        border: 1px solid var(--line);
+        border-radius: 14px;
+        padding: 14px;
+        position: relative;
+        overflow: hidden;
+      }
+      .cohort:before {
+        content: "";
+        position: absolute;
+        left: 0;
+        top: 0;
+        bottom: 0;
+        width: 4px;
+        background: var(--teal);
+      }
+      .cohort:nth-child(3):before {
+        background: var(--yellow);
+      }
+      .cohort:nth-child(4):before {
+        background: var(--red);
+      }
+      .cohort strong {
+        font-size: 25px;
+        display: block;
+      }
+      .cohort b {
+        font-size: 10px;
+      }
+      .cohort small {
+        font-size: 8px;
+        color: var(--muted);
+      }
+      .cohort .decision-mini {
+        margin-top: 8px;
+        padding-top: 8px;
+        border-top: 1px solid var(--line);
+        display: flex;
+        justify-content: space-between;
+        gap: 6px;
+        align-items: center;
+      }
+      .cohort .decision-mini span {
+        font-size: 8px;
+        color: var(--muted);
+      }
+      .portfolio-progress {
+        display: grid;
+        grid-template-columns: repeat(4, 1fr);
+        gap: 10px;
+        margin-top: 10px;
+      }
+      .portfolio-progress .mini {
+        border: 1px solid var(--line);
+        border-radius: 12px;
+        padding: 11px;
+        background: #fff;
+      }
+      .portfolio-progress .mini b {
+        display: block;
+        font-size: 18px;
+      }
+      .portfolio-progress .mini small {
+        font-size: 8px;
+        color: var(--muted);
+      }
+      .role-decision {
+        display: flex;
+        gap: 6px;
+        flex-wrap: wrap;
+        margin-top: 9px;
+      }
+      .role-decision .tag {
+        font-size: 7px;
+      }
+      .stack {
+        height: 18px;
+        border-radius: 999px;
+        overflow: hidden;
+        display: flex;
+        background: #edf2f3;
+        margin: 14px 0 5px;
+      }
+      .stack span:nth-child(1) {
+        background: var(--teal);
+      }
+      .stack span:nth-child(2) {
+        background: #48b7bd;
+      }
+      .stack span:nth-child(3) {
+        background: var(--yellow);
+      }
+      .stack span:nth-child(4) {
+        background: var(--red);
+      }
+      .legend {
+        display: flex;
+        gap: 14px;
+        flex-wrap: wrap;
+      }
+      .legend span {
+        font-size: 8px;
+        color: var(--muted);
+      }
+      .legend i {
+        width: 8px;
+        height: 8px;
+        border-radius: 50%;
+        display: inline-block;
+        margin-right: 4px;
+      }
+      .role-grid {
+        display: grid;
+        grid-template-columns: repeat(3, 1fr);
+        gap: 10px;
+      }
+      .role-card {
+        border: 1px solid var(--line);
+        border-radius: 14px;
+        padding: 13px;
+        cursor: pointer;
+      }
+      .role-card:hover,
+      .role-card.active {
+        border-color: #9fd8db;
+        background: #f7fcfc;
+      }
+      .role-top {
+        display: flex;
+        justify-content: space-between;
+        gap: 8px;
+      }
+      .role-card h3 {
+        font-size: 11px;
+        margin: 0;
+      }
+      .role-card strong {
+        font-size: 20px;
+        color: var(--teal-d);
+      }
+      .role-card small {
+        font-size: 8px;
+        color: var(--muted);
+        display: block;
+        margin-top: 7px;
+      }
+      .need {
+        margin-top: 8px;
+        padding-top: 8px;
+        border-top: 1px solid #edf2f3;
+        display: flex;
+        justify-content: space-between;
+        font-size: 8px;
+      }
+      .need b {
+        font-size: 8px;
+      }
+      .filters {
+        display: flex;
+        gap: 8px;
+        flex-wrap: wrap;
+        margin-bottom: 10px;
+      }
+      .search {
+        flex: 1;
+        min-width: 220px;
+        border: 1px solid var(--line);
+        border-radius: 9px;
+        padding: 9px 10px;
+        font-size: 10px;
+      }
+      .person {
+        display: flex;
+        align-items: center;
+        gap: 8px;
+      }
+      .avatar {
+        width: 30px;
+        height: 30px;
+        border-radius: 9px;
+        background: var(--teal-soft);
+        color: var(--teal-d);
+        display: grid;
+        place-items: center;
+        font-size: 9px;
+        font-weight: 900;
+      }
+      .person b {
+        font-size: 10px;
+      }
+      .person small {
+        display: block;
+        font-size: 8px;
+        color: var(--muted);
+      }
+      .meter {
+        display: grid;
+        grid-template-columns: 75px 30px;
+        gap: 7px;
+        align-items: center;
+      }
+      .meter .bar {
+        height: 6px;
+      }
+      .meter b {
+        font-size: 9px;
+        text-align: right;
+      }
+      .econ-hero {
+        display: grid;
+        grid-template-columns: repeat(6, 1fr);
+        gap: 10px;
+      }
+      .econ-controls {
+        display: grid;
+        grid-template-columns: repeat(3, 1fr);
+        gap: 14px;
+      }
+      .control {
+        border: 1px solid var(--line);
+        border-radius: 13px;
+        padding: 13px;
+      }
+      .control label {
+        display: flex;
+        justify-content: space-between;
+        gap: 8px;
+        font-size: 9px;
+        font-weight: 850;
+      }
+      .control input {
+        width: 100%;
+        accent-color: var(--teal);
+        margin-top: 11px;
+      }
+      .control small {
+        font-size: 8px;
+        color: var(--muted);
+      }
+      .costs {
+        display: grid;
+        grid-template-columns: repeat(3, 1fr);
+        gap: 10px;
+      }
+      .cost {
+        border: 1px solid var(--line);
+        border-radius: 13px;
+        padding: 13px;
+      }
+      .cost strong {
+        font-size: 20px;
+        display: block;
+      }
+      .cost b {
+        font-size: 9px;
+      }
+      .cost small {
+        font-size: 8px;
+        color: var(--muted);
+      }
+      .gates {
+        display: grid;
+        gap: 8px;
+      }
+      .gate {
+        display: grid;
+        grid-template-columns: 1.2fr 120px 120px 110px;
+        gap: 10px;
+        align-items: center;
+        border: 1px solid var(--line);
+        border-radius: 12px;
+        padding: 11px;
+      }
+      .gate b {
+        font-size: 10px;
+      }
+      .gate span {
+        font-size: 9px;
+        color: var(--muted);
+      }
+      .gate .actual {
+        font-weight: 900;
+        color: var(--ink);
+      }
+      .decision-card {
+        border: 1px solid #bfe5e7;
+        border-radius: 18px;
+        background: linear-gradient(135deg, #fff, #f0fbfb);
+        padding: 19px;
+      }
+      .decision-card h2 {
+        font-size: 21px;
+        margin: 0 0 5px;
+      }
+      .decision-card p {
+        font-size: 10px;
+        color: var(--muted);
+        margin: 0;
+      }
+      .approval-list {
+        display: grid;
+        gap: 8px;
+      }
+      .approval {
+        display: flex;
+        justify-content: space-between;
+        align-items: flex-start;
+        gap: 12px;
+        border: 1px solid var(--line);
+        border-radius: 11px;
+        padding: 10px;
+      }
+      .approval .approval-copy {
+        min-width: 0;
+      }
+      .approval b {
+        font-size: 10px;
+        display: block;
+      }
+      .approval small {
+        display: block;
+        font-size: 8px;
+        color: var(--muted);
+        margin-top: 3px;
+        line-height: 1.45;
+      }
+      .approval-status {
+        flex: 0 0 auto;
+        display: inline-flex;
+        align-items: center;
+        gap: 5px;
+        border-radius: 999px;
+        padding: 5px 8px;
+        font-size: 8px;
+        font-weight: 900;
+        white-space: nowrap;
+      }
+      .approval-status:before {
+        content: "";
+        width: 6px;
+        height: 6px;
+        border-radius: 50%;
+        background: currentColor;
+      }
+      .approval-status.approved {
+        background: var(--teal-soft);
+        color: var(--teal-d);
+      }
+      .approval-status.pending {
+        background: var(--yellow-soft);
+        color: #806000;
+      }
+      .approval-status.draft {
+        background: #f1f4f4;
+        color: #60747a;
+      }
+      .approval-status.revision {
+        background: var(--red-soft);
+        color: #a50e1c;
+      }
+      .approval-footer {
+        margin-top: 12px;
+        padding-top: 12px;
+        border-top: 1px solid var(--line);
+      }
+      .approval-summary {
+        display: flex;
+        justify-content: space-between;
+        gap: 10px;
+        align-items: flex-start;
+        margin-bottom: 10px;
+      }
+      .approval-summary b {
+        font-size: 10px;
+      }
+      .approval-summary span {
+        font-size: 8px;
+        color: var(--muted);
+        text-align: right;
+      }
+      .approval-note {
+        font-size: 8px;
+        color: var(--muted);
+        line-height: 1.5;
+        margin-top: 7px;
+      }
+      .approval-submit {
+        width: 100%;
+        margin-top: 2px;
+      }
+      .approval-submit:disabled {
+        opacity: 0.45;
+        cursor: not-allowed;
+        background: #edf2f3 !important;
+        color: #8b999d !important;
+        border-color: #dfe7e9 !important;
+      }
+      .identity-kpis {
+        display: grid;
+        grid-template-columns: repeat(4, 1fr);
+        gap: 10px;
+        margin-bottom: 12px;
+      }
+      .identity-kpis .card {
+        min-height: 106px;
+      }
+      .source-grid {
+        display: grid;
+        grid-template-columns: repeat(5, 1fr);
+        gap: 9px;
+      }
+      .source-card {
+        border: 1px solid var(--line);
+        border-radius: 12px;
+        padding: 11px;
+        background: #fff;
+        min-width: 0;
+      }
+      .source-card .source-name {
+        font-size: 9px;
+        font-weight: 900;
+        line-height: 1.25;
+        min-height: 25px;
+      }
+      .source-card .source-count {
+        font-size: 21px;
+        font-weight: 950;
+        margin: 8px 0 2px;
+      }
+      .source-card small {
+        font-size: 8px;
+        color: var(--muted);
+        display: block;
+      }
+      .source-card.restricted {
+        background: #fafafa;
+        border-style: dashed;
+      }
+      .identity-layout {
+        display: grid;
+        grid-template-columns: minmax(0, 1.35fr) minmax(300px, 0.65fr);
+        gap: 12px;
+        align-items: start;
+      }
+      .identity-table tr {
+        cursor: pointer;
+      }
+      .identity-table tr.active td {
+        background: var(--teal-soft);
+      }
+      .identity-status {
+        font-size: 8px;
+        font-weight: 900;
+        border-radius: 999px;
+        padding: 4px 7px;
+        display: inline-flex;
+        white-space: nowrap;
+      }
+      .identity-status.resolved {
+        background: var(--teal-soft);
+        color: var(--teal-d);
+      }
+      .identity-status.review {
+        background: var(--yellow-soft);
+        color: #806000;
+      }
+      .identity-status.separate {
+        background: #edf2f3;
+        color: #536c72;
+      }
+      .identity-status.unresolved {
+        background: var(--red-soft);
+        color: #a50e1c;
+      }
+      .canonical-box {
+        border: 1px solid #bee1e3;
+        background: var(--teal-soft);
+        border-radius: 12px;
+        padding: 12px;
+        margin-bottom: 10px;
+      }
+      .canonical-box .canonical-id {
+        font-size: 21px;
+        font-weight: 950;
+        letter-spacing: 0.02em;
+        margin: 3px 0;
+      }
+      .source-records {
+        display: grid;
+        gap: 7px;
+        margin-top: 8px;
+      }
+      .source-record {
+        border: 1px solid var(--line);
+        border-radius: 10px;
+        padding: 9px;
+        background: #fff;
+      }
+      .source-record .record-head {
+        display: flex;
+        justify-content: space-between;
+        gap: 8px;
+        align-items: center;
+      }
+      .source-record b {
+        font-size: 9px;
+      }
+      .source-record small {
+        display: block;
+        font-size: 8px;
+        color: var(--muted);
+        margin-top: 3px;
+        line-height: 1.4;
+      }
+      .rule-grid {
+        display: grid;
+        grid-template-columns: repeat(4, 1fr);
+        gap: 9px;
+      }
+      .rule {
+        border: 1px solid var(--line);
+        border-radius: 11px;
+        padding: 10px;
+        background: var(--soft);
+      }
+      .rule b {
+        font-size: 9px;
+        display: block;
+        margin-bottom: 4px;
+      }
+      .rule small {
+        font-size: 8px;
+        color: var(--muted);
+        line-height: 1.4;
+        display: block;
+      }
+      .identity-note {
+        border-left: 3px solid var(--teal);
+        padding: 9px 11px;
+        background: var(--teal-soft);
+        border-radius: 0 10px 10px 0;
+        font-size: 9px;
+        line-height: 1.5;
+        margin-top: 10px;
+      }
+      .text-link {
+        border: 0;
+        background: transparent;
+        padding: 0;
+        margin-top: 7px;
+        color: var(--teal-d);
+        font-size: 8px;
+        font-weight: 900;
+        text-align: left;
+      }
+      @media (max-width: 1000px) {
+        .source-grid {
+          grid-template-columns: repeat(3, 1fr);
+        }
+        .identity-layout {
+          grid-template-columns: 1fr;
+        }
+        .rule-grid {
+          grid-template-columns: repeat(2, 1fr);
+        }
+      }
+      @media (max-width: 700px) {
+        .identity-kpis {
+          grid-template-columns: repeat(2, 1fr);
+        }
+        .source-grid {
+          grid-template-columns: 1fr 1fr;
+        }
+        .rule-grid {
+          grid-template-columns: 1fr;
+        }
+      }
+      .identity-actions {
+        display: flex;
+        gap: 8px;
+        align-items: center;
+        flex-wrap: wrap;
+        margin: 10px 0 12px;
+      }
+      .identity-actions .select {
+        min-width: 160px;
+      }
+      .priority-flag {
+        font-size: 8px;
+        font-weight: 900;
+        color: #806000;
+        background: var(--yellow-soft);
+        border-radius: 999px;
+        padding: 4px 7px;
+        display: inline-flex;
+      }
+      .arch-kpis {
+        display: grid;
+        grid-template-columns: repeat(4, 1fr);
+        gap: 10px;
+        margin-bottom: 12px;
+      }
+      .arch-layout {
+        display: grid;
+        grid-template-columns: minmax(250px, 0.55fr) minmax(0, 1.45fr);
+        gap: 12px;
+        align-items: start;
+      }
+      .title-list {
+        display: grid;
+        gap: 7px;
+      }
+      .title-item {
+        border: 1px solid var(--line);
+        border-radius: 11px;
+        padding: 10px;
+        background: #fff;
+        cursor: pointer;
+      }
+      .title-item.active {
+        border-color: var(--teal);
+        background: var(--teal-soft);
+      }
+      .title-item b {
+        font-size: 9px;
+        display: block;
+      }
+      .title-item small {
+        font-size: 8px;
+        color: var(--muted);
+        display: block;
+        margin-top: 3px;
+      }
+      .arch-fields {
+        display: grid;
+        grid-template-columns: repeat(4, 1fr);
+        gap: 8px;
+      }
+      .arch-field {
+        border: 1px solid var(--line);
+        background: var(--soft);
+        border-radius: 10px;
+        padding: 9px;
+      }
+      .arch-field small {
+        font-size: 7px;
+        color: var(--muted);
+        display: block;
+        text-transform: uppercase;
+        letter-spacing: 0.05em;
+      }
+      .arch-field b {
+        font-size: 10px;
+        display: block;
+        margin-top: 3px;
+      }
+      .task-table .status-pill {
+        font-size: 7px;
+        font-weight: 900;
+        border-radius: 999px;
+        padding: 4px 7px;
+        display: inline-flex;
+      }
+      .status-pill.auto {
+        background: #edf2f3;
+        color: #5b6d72;
+      }
+      .status-pill.retain {
+        background: var(--teal-soft);
+        color: var(--teal-d);
+      }
+      .status-pill.elevate {
+        background: var(--yellow-soft);
+        color: #806000;
+      }
+      .status-pill.new {
+        background: #eef0ff;
+        color: #5059a8;
+      }
+      .taxonomy-grid {
+        display: grid;
+        grid-template-columns: repeat(2, 1fr);
+        gap: 8px;
+      }
+      .taxonomy-item {
+        border: 1px solid var(--line);
+        border-radius: 11px;
+        padding: 10px;
+        background: #fff;
+      }
+      .taxonomy-item .tax-head {
+        display: flex;
+        justify-content: space-between;
+        gap: 8px;
+        align-items: center;
+      }
+      .taxonomy-item b {
+        font-size: 9px;
+      }
+      .taxonomy-item small {
+        font-size: 8px;
+        color: var(--muted);
+        display: block;
+        margin-top: 4px;
+      }
+      .union-grid {
+        display: grid;
+        grid-template-columns: repeat(3, 1fr);
+        gap: 9px;
+      }
+      .union-item {
+        border: 1px solid var(--line);
+        border-radius: 11px;
+        padding: 10px;
+        background: #fff;
+      }
+      .union-item b {
+        font-size: 9px;
+        display: block;
+      }
+      .union-item small {
+        font-size: 8px;
+        color: var(--muted);
+        display: block;
+        margin: 4px 0 8px;
+        line-height: 1.4;
+      }
+      .union-footer {
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        gap: 10px;
+        margin-top: 10px;
+        flex-wrap: wrap;
+      }
+      @media (max-width: 1000px) {
+        .arch-layout {
+          grid-template-columns: 1fr;
+        }
+        .arch-fields {
+          grid-template-columns: repeat(2, 1fr);
+        }
+        .union-grid {
+          grid-template-columns: 1fr;
+        }
+        .arch-kpis {
+          grid-template-columns: repeat(2, 1fr);
+        }
+      }
+      @media (max-width: 700px) {
+        .taxonomy-grid {
+          grid-template-columns: 1fr;
+        }
+        .arch-fields {
+          grid-template-columns: 1fr;
+        }
+        .arch-kpis {
+          grid-template-columns: 1fr 1fr;
+        }
+      }
+
+      .overlay {
+        display: none;
+        position: fixed;
+        inset: 0;
+        background: rgba(18, 42, 48, 0.28);
+        z-index: 80;
+      }
+      .overlay.show {
+        display: block;
+      }
+      .drawer {
+        position: fixed;
+        right: 0;
+        top: 0;
+        width: min(520px, 96vw);
+        height: 100vh;
+        background: #fff;
+        z-index: 90;
+        box-shadow: -20px 0 60px rgba(15, 45, 52, 0.15);
+        transform: translateX(105%);
+        transition: 0.25s;
+        overflow: auto;
+      }
+      .drawer.open {
+        transform: none;
+      }
+      .drawer-head {
+        position: sticky;
+        top: 0;
+        background: #fff;
+        border-bottom: 1px solid var(--line);
+        padding: 18px;
+        display: flex;
+        justify-content: space-between;
+        gap: 10px;
+        z-index: 2;
+      }
+      .drawer-head h2 {
+        font-size: 17px;
+        margin: 0;
+      }
+      .drawer-body {
+        padding: 18px;
+      }
+      .close {
+        border: 1px solid var(--line);
+        background: #fff;
+        border-radius: 9px;
+        width: 32px;
+        height: 32px;
+      }
+      .skill {
+        margin: 10px 0;
+      }
+      .skill-top {
+        display: flex;
+        justify-content: space-between;
+        font-size: 9px;
+      }
+      .skill-track {
+        height: 7px;
+        background: #edf2f3;
+        border-radius: 30px;
+        overflow: hidden;
+        margin-top: 5px;
+      }
+      .skill-track i {
+        display: block;
+        height: 100%;
+        background: var(--teal);
+        border-radius: 30px;
+      }
+      .skill-track i.gap {
+        background: var(--yellow);
+      }
+      .action-row {
+        display: flex;
+        gap: 8px;
+        flex-wrap: wrap;
+        margin-top: 14px;
+      }
+      .evidence-list {
+        display: grid;
+        gap: 9px;
+      }
+      .evidence-item {
+        border: 1px solid var(--line);
+        border-radius: 12px;
+        padding: 11px;
+        background: #fff;
+      }
+      .evidence-row {
+        display: flex;
+        justify-content: space-between;
+        gap: 10px;
+        align-items: flex-start;
+      }
+      .evidence-item h4 {
+        font-size: 10px;
+        margin: 0 0 3px;
+      }
+      .evidence-meta {
+        font-size: 8px;
+        color: var(--muted);
+        line-height: 1.5;
+      }
+      .evidence-actions {
+        display: flex;
+        align-items: center;
+        gap: 7px;
+        margin-top: 9px;
+      }
+      .evidence-actions .btn {
+        padding: 6px 9px;
+        font-size: 9px;
+      }
+      .btn.danger {
+        border-color: #efbfc5;
+        color: #a50e1c;
+        background: #fff;
+      }
+      .btn.warn {
+        border-color: #ecd99b;
+        color: #7a5c00;
+        background: #fffdf4;
+      }
+      .btn:disabled {
+        opacity: 0.42;
+        cursor: not-allowed;
+        background: #f4f6f7 !important;
+        color: #9aa4a6 !important;
+        border-color: #dde4e6 !important;
+        box-shadow: none !important;
+      }
+      .evidence-backdrop {
+        display: none;
+        position: fixed;
+        inset: 0;
+        background: rgba(18, 42, 48, 0.36);
+        z-index: 98;
+      }
+      .evidence-backdrop.show {
+        display: block;
+      }
+      .evidence-modal {
+        display: none;
+        position: fixed;
+        left: 50%;
+        top: 50%;
+        transform: translate(-50%, -50%);
+        width: min(760px, 94vw);
+        max-height: 90vh;
+        overflow: auto;
+        background: #fff;
+        border-radius: 18px;
+        box-shadow: 0 28px 80px rgba(15, 45, 52, 0.22);
+        z-index: 105;
+      }
+      .evidence-modal.open {
+        display: block;
+      }
+      .evidence-modal-head {
+        position: sticky;
+        top: 0;
+        z-index: 2;
+        background: #fff;
+        border-bottom: 1px solid var(--line);
+        padding: 16px 18px;
+        display: flex;
+        justify-content: space-between;
+        gap: 12px;
+      }
+      .evidence-modal-head h2 {
+        font-size: 16px;
+        margin: 0;
+      }
+      .evidence-modal-body {
+        padding: 18px;
+      }
+      .evidence-preview {
+        min-height: 230px;
+        border: 1px solid var(--line);
+        border-radius: 14px;
+        background: linear-gradient(145deg, #f8fbfb, #eef5f5);
+        display: grid;
+        place-items: center;
+        padding: 24px;
+        text-align: center;
+      }
+      .doc-sheet {
+        width: min(390px, 92%);
+        background: #fff;
+        border: 1px solid #d7e2e4;
+        border-radius: 8px;
+        box-shadow: 0 12px 30px rgba(20, 55, 62, 0.08);
+        padding: 24px;
+        text-align: left;
+      }
+      .doc-sheet .doc-title {
+        font-size: 15px;
+        font-weight: 950;
+        margin-bottom: 14px;
+      }
+      .doc-line {
+        height: 7px;
+        border-radius: 10px;
+        background: #e8eeee;
+        margin: 8px 0;
+      }
+      .doc-line.w80 {
+        width: 80%;
+      }
+      .doc-line.w60 {
+        width: 60%;
+      }
+      .doc-line.w45 {
+        width: 45%;
+      }
+      .doc-stamp {
+        width: 72px;
+        height: 72px;
+        border: 2px solid var(--teal);
+        color: var(--teal-d);
+        border-radius: 50%;
+        display: grid;
+        place-items: center;
+        font-size: 8px;
+        font-weight: 900;
+        transform: rotate(-9deg);
+        margin: 20px 0 0 auto;
+      }
+      .review-grid {
+        display: grid;
+        grid-template-columns: 1fr 1fr;
+        gap: 12px;
+        margin-top: 12px;
+      }
+      .notes-label {
+        font-size: 9px;
+        font-weight: 900;
+        margin: 14px 0 7px;
+      }
+      .quick-notes {
+        display: flex;
+        gap: 6px;
+        flex-wrap: wrap;
+      }
+      .note-chip {
+        border: 1px solid var(--line);
+        background: #fff;
+        border-radius: 999px;
+        padding: 6px 9px;
+        font-size: 8px;
+        color: #5d7177;
+      }
+      .note-chip:hover,
+      .note-chip.active {
+        border-color: #9fd8db;
+        background: var(--teal-soft);
+        color: var(--teal-d);
+      }
+      .review-note {
+        width: 100%;
+        min-height: 84px;
+        resize: vertical;
+        border: 1px solid var(--line);
+        border-radius: 10px;
+        padding: 10px;
+        font: inherit;
+        font-size: 10px;
+        outline: none;
+      }
+      .review-note:focus {
+        border-color: #9fd8db;
+      }
+      .review-footer {
+        display: flex;
+        justify-content: space-between;
+        gap: 10px;
+        align-items: center;
+        margin-top: 15px;
+        padding-top: 14px;
+        border-top: 1px solid var(--line);
+      }
+      .review-footer .action-row {
+        margin: 0;
+      }
+      .review-history {
+        font-size: 8px;
+        color: var(--muted);
+      }
+
+      .toast {
+        position: fixed;
+        right: 24px;
+        bottom: 24px;
+        background: #17343b;
+        color: #fff;
+        padding: 11px 14px;
+        border-radius: 10px;
+        font-size: 9px;
+        font-weight: 800;
+        opacity: 0;
+        transform: translateY(8px);
+        pointer-events: none;
+        transition: 0.2s;
+        z-index: 120;
+      }
+      .toast.show {
+        opacity: 1;
+        transform: none;
+      }
+      @media (max-width: 1120px) {
+        .target-grid,
+        .g6,
+        .econ-hero {
+          grid-template-columns: repeat(3, 1fr);
+        }
+        .role-grid {
+          grid-template-columns: repeat(2, 1fr);
+        }
+        .kpi-strip {
+          grid-template-columns: repeat(2, 1fr);
+        }
+      }
+      @media (max-width: 820px) {
+        .app {
+          display: block;
+        }
+        .sidebar {
+          position: fixed;
+          left: 0;
+          top: 0;
+          transform: translateX(-105%);
+          transition: 0.2s;
+          width: 230px;
+          box-shadow: 20px 0 50px rgba(0, 0, 0, 0.12);
+        }
+        .sidebar.open {
+          transform: none;
+        }
+        .menu {
+          display: inline-block;
+        }
+        .topbar {
+          padding: 0 15px;
+        }
+        .content {
+          padding: 18px 14px;
+        }
+        .split {
+          grid-template-columns: 1fr;
+        }
+        .detail {
+          position: static;
+        }
+        .g4,
+        .g3,
+        .g2,
+        .target-grid,
+        .econ-hero,
+        .econ-controls,
+        .costs,
+        .cohort-strip,
+        .role-grid,
+        .alerts {
+          grid-template-columns: 1fr;
+        }
+        .kpi-strip {
+          grid-template-columns: 1fr 1fr;
+        }
+        .gate {
+          grid-template-columns: 1fr auto;
+        }
+        .gate .target-v,
+        .gate .actual {
+          display: none;
+        }
+        .page-head h1 {
+          font-size: 23px;
+        }
+      }
+      @media (max-width: 520px) {
+        .kpi-strip {
+          grid-template-columns: 1fr;
+        }
+        .top-actions .select {
+          display: none;
+        }
+      }
+    </style>
+  </head>
+  <body>
+    <div class="app">
+      <aside class="sidebar" id="sidebar">
+        <div class="brand">
+          <div class="mark"></div>
+          <div>
+            <b>Project CotSin</b><small>Workforce Transition Cockpit</small>
+          </div>
+        </div>
+        <div class="project-card">
+          <div class="top"><b>Hari ke-28</b><span>17 hari tersisa</span></div>
+          <div class="mini-track">
+            <div class="mini-fill" style="width: 64%"></div>
+          </div>
+          <span>Target keputusan: Hari ke-45</span>
+        </div>
+        <div class="nav-label">Workspace</div>
+        <div class="nav" id="nav">
+          <button class="active" data-screen="summary">
+            <span class="dot"></span>Ringkasan
+          </button>
+          <button data-screen="identity">
+            <span class="dot"></span>Resolusi Identitas
+          </button>
+          <button data-screen="architecture">
+            <span class="dot"></span>Arsitektur Pekerjaan
+          </button>
+          <button data-screen="exposure">
+            <span class="dot"></span>Paparan
+          </button>
+          <button data-screen="transition">
+            <span class="dot"></span>Portofolio Transisi
+          </button>
+          <button data-screen="people">
+            <span class="dot"></span>Karyawan
+          </button>
+          <button data-screen="economics">
+            <span class="dot"></span>Ekonomi
+          </button>
+          <button data-screen="decision">
+            <span class="dot"></span>Keputusan
+          </button>
+        </div>
+        <div class="side-foot">
+          <div class="sync">
+            <b>Data simulasi</b><br />Sinkron terakhir
+            <span id="syncSide">—</span>
+          </div>
+        </div>
+      </aside>
+
+      <main class="main">
+        <header class="topbar">
+          <div style="display: flex; align-items: center; gap: 10px">
+            <button class="btn menu" id="menuBtn">☰</button>
+            <div class="context">
+              <b id="contextTitle">Ringkasan</b
+              ><span>Field ABCD · 3 wilayah</span>
+            </div>
+          </div>
+          <div class="top-actions">
+            <select class="select" id="regionSelect">
+              <option value="ALL">Semua Wilayah</option>
+              <option value="A">Wilayah A</option>
+              <option value="B">Wilayah B</option>
+              <option value="C">Wilayah C</option>
+            </select>
+            <button class="btn" id="refreshBtn">↻ Perbarui</button>
+          </div>
+        </header>
+
+        <div class="content">
+          <section class="screen active" id="summary">
+            <div class="page-head">
+              <div><h1>Ringkasan</h1></div>
+              <div class="meta">
+                Status saat ini · <span id="syncMain">—</span>
+              </div>
+            </div>
+            <div class="kpi-strip">
+              <div class="card">
+                <div class="label">Total Tenaga Kerja</div>
+                <div class="metric">~26.000</div>
+                <div class="sub">Enterprise</div>
+              </div>
+              <div class="card">
+                <div class="label">Total Jabatan</div>
+                <div class="metric">900+</div>
+                <div class="sub">Lintas unit & wilayah</div>
+              </div>
+              <div class="card">
+                <div class="label">Unit Operasi</div>
+                <div class="metric">3</div>
+                <div class="sub">Wilayah</div>
+              </div>
+              <div class="card deadline">
+                <div class="ring"><strong>17</strong></div>
+                <div>
+                  <div class="label">Hitung Mundur Mandat</div>
+                  <div class="metric sm">hari tersisa</div>
+                  <div class="sub">Hari ke-28 dari 45</div>
+                </div>
+              </div>
+            </div>
+            <div class="grid g2" style="margin-bottom: 12px">
+              <div class="card red">
+                <div class="label">Ekuivalen Pekerjaan Terdampak</div>
+                <div class="metric" id="sumAffected">~2.100</div>
+                <div class="sub">Field ABCD</div>
+              </div>
+              <div class="card">
+                <div class="label">Populasi Pilot</div>
+                <div class="metric" id="sumPilot">3.000</div>
+                <div class="sub">Field ABCD & Manual Operations</div>
+              </div>
+            </div>
+            <div class="section-title">
+              <h2>Target Akuntabilitas</h2>
+              <span
+                >Nilai berubah mengikuti data wilayah & skenario ekonomi</span
+              >
+            </div>
+            <div class="target-grid">
+              <div class="target">
+                <div class="target-head">
+                  <b>Visibilitas Tenaga Kerja</b
+                  ><span class="tag" id="visTag">—</span>
+                </div>
+                <div class="value" id="visValue">—</div>
+                <small>Target ≥95%</small>
+                <div class="progress"><i id="visBar"></i></div>
+                <button class="text-link" id="goIdentityBtn">
+                  Lihat resolusi identitas →
+                </button>
+              </div>
+              <div class="target">
+                <div class="target-head">
+                  <b>Keandalan Bukti</b><span class="tag" id="evidTag">—</span>
+                </div>
+                <div class="value" id="evidValue">—</div>
+                <small>Target ≥80%</small>
+                <div class="progress"><i id="evidBar"></i></div>
+              </div>
+              <div class="target">
+                <div class="target-head">
+                  <b>Cakupan Penempatan Ulang</b
+                  ><span class="tag" id="pathTag">—</span>
+                </div>
+                <div class="value" id="pathValue">—</div>
+                <small
+                  >Target ≥70% ·
+                  <span id="pathDecisionMeta"
+                    >0/0 rekomendasi disetujui Head HC</span
+                  ></small
+                >
+                <div class="progress"><i id="pathBar"></i></div>
+              </div>
+              <div class="target">
+                <div class="target-head">
+                  <b>Perlindungan Pekerja</b
+                  ><span class="tag good">Terjaga</span>
+                </div>
+                <div class="value" id="protectValue">100%</div>
+                <small>Target 100%</small>
+                <div class="progress"><i style="width: 100%"></i></div>
+              </div>
+              <div class="target">
+                <div class="target-head">
+                  <b>Kelayakan Ekonomi</b
+                  ><span class="tag" id="econTag">—</span>
+                </div>
+                <div class="value" id="econValue">2,1×</div>
+                <small>Target ≥1,0×</small>
+                <div class="progress"><i id="econBar"></i></div>
+              </div>
+              <div class="target">
+                <div class="target-head">
+                  <b>Kesiapan Scale up</b
+                  ><span class="tag" id="scaleTag">—</span>
+                </div>
+                <div class="value" id="scaleValue">—</div>
+                <small
+                  >Gate Hari ke-45 ·
+                  <span id="scaleDecisionMeta"
+                    >Keputusan Head HC 0%</span
+                  ></small
+                >
+                <div class="progress"><i id="scaleBar"></i></div>
+              </div>
+            </div>
+            <div class="section-title">
+              <h2>Perlu Perhatian</h2>
+              <span>Prioritas operasional saat ini</span>
+            </div>
+            <div class="alerts" id="alerts"></div>
+          </section>
+
+          <section class="screen" id="identity">
+            <div class="page-head">
+              <div><h1>Resolusi Identitas</h1></div>
+              <div class="meta">
+                <span id="identityRegionLabel">Semua Wilayah</span>
+              </div>
+            </div>
+
+            <div class="identity-kpis">
+              <div class="card">
+                <div class="label">Populasi Pilot</div>
+                <div class="metric" id="identityPopulation">3.000</div>
+                <div class="sub">Field ABCD</div>
+              </div>
+              <div class="card">
+                <div class="label">Canonical ID Terbentuk</div>
+                <div class="metric" id="identityResolved">2.799</div>
+                <div class="sub" id="identityResolvedPct">
+                  92,6% dari populasi
+                </div>
+              </div>
+              <div class="card yellow">
+                <div class="label">Perlu Review Data Steward</div>
+                <div class="metric" id="identityReview">123</div>
+                <div class="sub">Belum final</div>
+              </div>
+              <div class="card red">
+                <div class="label">Belum Terhubung</div>
+                <div class="metric" id="identityUnresolved">98</div>
+                <div class="sub">Tanpa Canonical Person ID</div>
+              </div>
+            </div>
+
+            <div class="identity-actions">
+              <select class="select" id="identityStatusFilter">
+                <option value="ALL">Semua Status</option>
+                <option value="review">Perlu Review</option>
+                <option value="unresolved">Belum Terhubung</option>
+                <option value="separate">Tidak Digabung</option>
+                <option value="resolved">Terhubung</option>
+              </select>
+              <button class="btn" id="identityExceptionsBtn">
+                Fokus Exception
+              </button>
+              <button class="btn" id="identityResetBtn">Reset</button>
+              <button class="btn primary" id="identityExportBtn">
+                Ekspor Exception
+              </button>
+            </div>
+
+            <div class="section-title">
+              <h2>Sumber Identitas</h2>
+              <span>Coverage</span>
+            </div>
+            <div class="source-grid" id="identitySources"></div>
+
+            <div class="section-title">
+              <h2>Konfigurasi Resolusi</h2>
+              <span>Aktif</span>
+            </div>
+            <div class="rule-grid">
+              <div class="rule">
+                <b>Canonical ID</b><small>MRD-P-######</small>
+              </div>
+              <div class="rule"><b>Anchor</b><small>SAP</small></div>
+              <div class="rule">
+                <b>Auto link</b><small>Confidence ≥90%</small>
+              </div>
+              <div class="rule">
+                <b>Review Data Steward</b><small>Confidence 70–89%</small>
+              </div>
+            </div>
+
+            <div class="section-title">
+              <h2>Hasil Resolusi</h2>
+              <span id="identityResultMeta">—</span>
+            </div>
+            <div class="identity-layout">
+              <div class="table-wrap">
+                <table class="table identity-table">
+                  <thead>
+                    <tr>
+                      <th>Canonical ID</th>
+                      <th>Nama</th>
+                      <th>Wilayah</th>
+                      <th>Sumber</th>
+                      <th>Confidence</th>
+                      <th>Status</th>
+                    </tr>
+                  </thead>
+                  <tbody id="identityBody"></tbody>
+                </table>
+              </div>
+              <div class="card detail" id="identityDetail"></div>
+            </div>
+          </section>
+
+          <section class="screen" id="architecture">
+            <div class="page-head">
+              <div><h1>Arsitektur Pekerjaan</h1></div>
+              <div class="meta">Field ABCD · v0</div>
+            </div>
+
+            <div class="arch-kpis">
+              <div class="card">
+                <div class="label">Jabatan Lokal Dipetakan</div>
+                <div class="metric">3</div>
+                <div class="sub">contoh pilot</div>
+              </div>
+              <div class="card">
+                <div class="label">Job Family</div>
+                <div class="metric sm">Field Operations</div>
+                <div class="sub">canonical</div>
+              </div>
+              <div class="card">
+                <div class="label">Capability Band</div>
+                <div class="metric sm">Field Device Ops</div>
+                <div class="sub">pilot</div>
+              </div>
+              <div class="card">
+                <div class="label">Task yang Dipetakan</div>
+                <div class="metric">4</div>
+                <div class="sub">manual → XYZ</div>
+              </div>
+            </div>
+
+            <div class="section-title">
+              <h2>Canonical Job Architecture</h2>
+              <span>Klik jabatan lokal</span>
+            </div>
+            <div class="arch-layout">
+              <div class="title-list" id="localTitleList"></div>
+              <div class="card" id="canonicalJobDetail"></div>
+            </div>
+
+            <div class="section-title">
+              <h2>Field ABCD Task Decomposition</h2>
+              <span id="taskSummary">—</span>
+            </div>
+            <div class="table-wrap">
+              <table class="table task-table">
+                <thead>
+                  <tr>
+                    <th>Task Saat Ini</th>
+                    <th>Status</th>
+                    <th>Task Masa Depan</th>
+                    <th>Kapabilitas</th>
+                  </tr>
+                </thead>
+                <tbody id="taskBody"></tbody>
+              </table>
+            </div>
+
+            <div class="section-title">
+              <h2>Taksonomi Kapabilitas</h2>
+              <span>Field Device Operations</span>
+            </div>
+            <div class="taxonomy-grid" id="taxonomyGrid"></div>
+          </section>
+
+          <section class="screen" id="exposure">
+            <div class="page-head">
+              <div><h1>Paparan & Prioritas</h1></div>
+              <div class="meta">Klik rumpun jabatan untuk melihat detail</div>
+            </div>
+            <div class="split">
+              <div class="table-wrap">
+                <table class="table" id="exposureTable">
+                  <thead>
+                    <tr>
+                      <th>Rumpun Jabatan</th>
+                      <th>Populasi</th>
+                      <th>Paparan AI</th>
+                      <th>Horizon</th>
+                      <th>Keandalan Data</th>
+                      <th>Kelayakan Reskilling</th>
+                      <th>Status</th>
+                    </tr>
+                  </thead>
+                  <tbody></tbody>
+                </table>
+              </div>
+              <div class="card detail" id="exposureDetail"></div>
+            </div>
+          </section>
+
+          <section class="screen" id="transition">
+            <div class="page-head">
+              <div><h1>Portofolio Transisi</h1></div>
+              <div class="meta">
+                <span id="transAffected">~2.100</span> ekuivalen pekerjaan
+                terdampak
+              </div>
+            </div>
+
+            <div class="cohort-strip">
+              <div class="cohort">
+                <strong id="cohortReady">450</strong
+                ><b>Siap Ditempatkan Ulang</b><small>Gap minimal</small>
+                <div class="decision-mini">
+                  <span>Keputusan Head HC</span
+                  ><b id="cohortReadyDecision">0/0 disetujui</b>
+                </div>
+              </div>
+              <div class="cohort">
+                <strong id="cohortNear">750</strong><b>Hampir Siap</b
+                ><small>Intervensi ringan</small>
+                <div class="decision-mini">
+                  <span>Keputusan Head HC</span
+                  ><b id="cohortNearDecision">0/0 disetujui</b>
+                </div>
+              </div>
+              <div class="cohort">
+                <strong id="cohortReskill">600</strong
+                ><b>Reskilling Terstruktur</b
+                ><small>Gap kapabilitas jelas</small>
+                <div class="decision-mini">
+                  <span>Keputusan Head HC</span
+                  ><b id="cohortReskillDecision">0/0 disetujui</b>
+                </div>
+              </div>
+              <div class="cohort">
+                <strong id="cohortTransition">300</strong
+                ><b>Manajemen Transisi</b><small>Perlu jalur alternatif</small>
+                <div class="decision-mini">
+                  <span>Keputusan Head HC</span
+                  ><b id="cohortTransitionDecision">0/0 disetujui</b>
+                </div>
+              </div>
+            </div>
+
+            <div class="card" style="margin-top: 10px">
+              <div class="label">Distribusi Portofolio</div>
+              <div class="stack" id="cohortStack"></div>
+              <div class="legend">
+                <span><i style="background: var(--teal)"></i>Siap</span
+                ><span><i style="background: #48b7bd"></i>Hampir Siap</span
+                ><span><i style="background: var(--yellow)"></i>Reskilling</span
+                ><span><i style="background: var(--red)"></i>Transisi</span>
+              </div>
+            </div>
+
+            <div class="portfolio-progress">
+              <div class="mini">
+                <b id="portfolioApproved">0</b><small>Disetujui Head HC</small>
+              </div>
+              <div class="mini">
+                <b id="portfolioPending">0</b><small>Menunggu Keputusan</small>
+              </div>
+              <div class="mini">
+                <b id="portfolioHeld">0</b><small>Ditunda</small>
+              </div>
+              <div class="mini">
+                <b id="portfolioReturned">0</b
+                ><small>Dikembalikan ke Supervisor</small>
+              </div>
+            </div>
+
+            <div class="section-title">
+              <h2>Peran Tujuan</h2>
+              <span>Status keputusan diperbarui dari review Head HC</span>
+            </div>
+            <div class="split">
+              <div class="role-grid" id="roleGrid"></div>
+              <div class="card detail" id="roleDetail"></div>
+            </div>
+          </section>
+
+          <section class="screen" id="people">
+            <div class="page-head">
+              <div><h1>Karyawan</h1></div>
+              <div class="meta">Rekomendasi supervisor lintas 3 wilayah</div>
+            </div>
+            <div class="filters">
+              <input
+                class="search"
+                id="searchPeople"
+                placeholder="Cari nama, jabatan, target peran..."
+              />
+              <select class="select" id="peopleRegion">
+                <option value="">Semua wilayah</option>
+                <option>A</option>
+                <option>B</option>
+                <option>C</option>
+              </select>
+              <select class="select" id="peopleCohort">
+                <option value="">Semua rekomendasi</option>
+                <option>Siap Ditempatkan Ulang</option>
+                <option>Hampir Siap</option>
+                <option>Reskilling Terstruktur</option>
+                <option>Manajemen Transisi</option>
+              </select>
+            </div>
+            <div class="table-wrap">
+              <table class="table">
+                <thead>
+                  <tr>
+                    <th>Karyawan</th>
+                    <th>Wilayah</th>
+                    <th>Jabatan Saat Ini</th>
+                    <th>Peran Target</th>
+                    <th>Kesesuaian</th>
+                    <th>Keandalan Bukti</th>
+                    <th>Rekomendasi Supervisor</th>
+                    <th>Keputusan Head HC</th>
+                  </tr>
+                </thead>
+                <tbody id="peopleBody"></tbody>
+              </table>
+            </div>
+          </section>
+
+          <section class="screen" id="economics">
+            <div class="page-head">
+              <div><h1>Ekonomi</h1></div>
+              <div class="meta">Skenario dasar · tanpa penghematan gaji</div>
+            </div>
+            <div class="econ-hero">
+              <div class="card red">
+                <div class="label">Biaya Penundaan</div>
+                <div class="metric sm">Rp38,25 M</div>
+              </div>
+              <div class="card">
+                <div class="label">Biaya Transformasi</div>
+                <div class="metric sm" id="programCostCard">Rp30,1 M</div>
+              </div>
+              <div class="card yellow">
+                <div class="label">Nilai Kotor</div>
+                <div class="metric sm" id="grossCard">Rp63,0 M</div>
+              </div>
+              <div class="card teal">
+                <div class="label">Nilai Bersih</div>
+                <div class="metric sm" id="netCard">Rp32,9 M</div>
+              </div>
+              <div class="card">
+                <div class="label">Rasio Nilai/Biaya</div>
+                <div class="metric sm" id="ratioCard">2,1×</div>
+              </div>
+              <div class="card">
+                <div class="label">Break-even Program</div>
+                <div class="metric sm" id="beCard">502</div>
+                <div class="sub">rekrutmen dihindari</div>
+              </div>
+            </div>
+            <div class="section-title">
+              <h2>Uji Skenario</h2>
+              <span>Perubahan langsung tercermin di Ringkasan & Keputusan</span>
+            </div>
+            <div class="econ-controls">
+              <div class="control">
+                <label
+                  ><span>Rekrutmen Eksternal yang Dihindari</span
+                  ><b id="hireLabel">1.050</b></label
+                ><input
+                  id="hireSlider"
+                  type="range"
+                  min="1"
+                  max="4200"
+                  step="1"
+                  value="2100"
+                /><small>Rentang 1–2.100 · Base case: 1.050</small>
+              </div>
+              <div class="control">
+                <label
+                  ><span>Nilai per Rekrutmen</span
+                  ><b id="costLabel">Rp60.000.000</b></label
+                ><input
+                  id="costSlider"
+                  type="range"
+                  min="0.001"
+                  max="120"
+                  step="0.001"
+                  value="60"
+                /><small>Kelipatan Rp1.000 · Maks. Rp120 juta</small>
+              </div>
+              <div class="control">
+                <label
+                  ><span>Total Biaya Transformasi</span
+                  ><b id="programLabel">Rp30,1 M</b></label
+                ><input
+                  id="programSlider"
+                  type="range"
+                  min="0.1"
+                  max="100"
+                  step="0.1"
+                  value="60.2"
+                /><small>Kelipatan Rp100 juta · Maks. Rp100 miliar</small>
+              </div>
+            </div>
+            <div class="section-title">
+              <h2>Biaya Penundaan 1 Tahun</h2>
+              <span>Rp38,25 miliar</span>
+            </div>
+            <div class="costs">
+              <div class="cost">
+                <strong>Rp27,0 M</strong
+                ><b>Rekrutmen Eksternal yang Dapat Dihindari</b
+                ><small>450 × Rp60 juta</small>
+              </div>
+              <div class="cost">
+                <strong>Rp6,75 M</strong><b>Biaya Tambahan Reskilling</b
+                ><small>1.350 × Rp5 juta</small>
+              </div>
+              <div class="cost">
+                <strong>Rp4,5 M</strong><b>Remediasi Perubahan & Kepercayaan</b
+                ><small>Cadangan skenario</small>
+              </div>
+            </div>
+          </section>
+
+          <section class="screen" id="decision">
+            <div class="page-head">
+              <div><h1>Keputusan Hari ke-45</h1></div>
+              <div class="meta">Gate keputusan scale up</div>
+            </div>
+            <div class="grid g2">
+              <div class="decision-card">
+                <div class="label">Rekomendasi Sistem</div>
+                <h2 id="decisionTitle">—</h2>
+                <p id="decisionText">—</p>
+                <div class="action-row">
+                  <button class="btn primary" id="goGapBtn">
+                    Lihat gap terbesar</button
+                  ><button class="btn" id="goEconBtn">Uji ekonomi</button>
+                </div>
+              </div>
+              <div class="card">
+                <div class="label">Persetujuan Direksi</div>
+                <div class="sub" style="margin-bottom: 10px">
+                  Status formal keputusan Direksi · read only untuk Head HC
+                </div>
+                <div class="approval-list" id="approvalList"></div>
+                <div class="approval-footer">
+                  <div class="approval-summary">
+                    <b id="approvalSummaryTitle">Paket keputusan</b>
+                    <span id="approvalSummaryMeta">—</span>
+                  </div>
+                  <button
+                    class="btn primary approval-submit"
+                    id="submitBoardApproval"
+                  >
+                    Ajukan ke Direksi
+                  </button>
+                  <div class="approval-note" id="approvalActionNote">
+                    Head HC mengajukan paket keputusan; status persetujuan akhir
+                    hanya dapat ditetapkan oleh Direksi.
+                  </div>
+                </div>
+              </div>
+            </div>
+            <div class="section-title">
+              <h2>Gate Akuntabilitas</h2>
+              <span>Status untuk wilayah yang dipilih</span>
+            </div>
+            <div class="gates" id="gateList"></div>
+            <div class="section-title">
+              <h2>Validasi Serikat Pekerja</h2>
+              <span id="unionSummary">—</span>
+            </div>
+            <div class="card">
+              <div class="union-grid" id="unionGrid"></div>
+              <div class="union-footer">
+                <div class="sub" id="unionActionNote">—</div>
+                <button class="btn primary" id="submitUnionAgenda">
+                  Ajukan Agenda Final
+                </button>
+              </div>
+            </div>
+          </section>
+        </div>
+      </main>
+    </div>
+
+    <div class="overlay" id="overlay"></div>
+    <aside class="drawer" id="drawer">
+      <div class="drawer-head">
+        <div>
+          <h2 id="drawerName">Karyawan</h2>
+          <div class="sub" id="drawerMeta"></div>
+        </div>
+        <button class="close" id="closeDrawer">×</button>
+      </div>
+      <div class="drawer-body">
+        <div class="grid g2">
+          <div class="card soft">
+            <div class="label">Kesesuaian Kapabilitas</div>
+            <div class="metric sm" id="drawerMatch">—</div>
+          </div>
+          <div class="card soft">
+            <div class="label">Keandalan Bukti</div>
+            <div class="metric sm" id="drawerEvidence">—</div>
+          </div>
+        </div>
+
+        <div class="section-title"><h2>Profil</h2></div>
+        <div class="card">
+          <div class="kv"><span>Jabatan</span><b id="drawerTitle">—</b></div>
+          <div class="kv">
+            <span>Grade / Wilayah</span><b id="drawerGrade">—</b>
+          </div>
+          <div class="kv">
+            <span>Peran Target</span><b id="drawerTarget">—</b>
+          </div>
+          <div class="kv">
+            <span>Estimasi Transisi</span><b id="drawerDuration">—</b>
+          </div>
+          <div class="kv">
+            <span>Status Validasi Supervisor</span
+            ><b id="drawerValidation">—</b>
+          </div>
+        </div>
+
+        <div class="section-title">
+          <h2>Rekomendasi Supervisor</h2>
+          <span id="supervisorName">—</span>
+        </div>
+        <div class="card" id="supervisorCard">
+          <div class="kv">
+            <span>Rekomendasi</span><b id="supervisorRecommendation">—</b>
+          </div>
+          <div class="kv"><span>Catatan</span><b id="supervisorNote">—</b></div>
+          <div class="kv">
+            <span>Status Bukti</span><b id="supervisorEvidenceStatus">—</b>
+          </div>
+        </div>
+
+        <div class="section-title"><h2>Kapabilitas Saat Ini</h2></div>
+        <div id="drawerSkills"></div>
+
+        <div class="section-title"><h2>Kesenjangan Kapabilitas</h2></div>
+        <div id="drawerGaps"></div>
+
+        <div class="section-title">
+          <h2>Bukti Pendukung</h2>
+          <span id="evidenceReviewSummary">—</span>
+        </div>
+        <div class="evidence-list" id="drawerEvidenceList"></div>
+
+        <div class="section-title">
+          <h2>Keputusan Head HC</h2>
+          <span id="headDecisionStatus">Menunggu keputusan</span>
+        </div>
+        <div class="card">
+          <div class="label">Catatan Keputusan</div>
+          <textarea
+            class="review-note"
+            id="headDecisionNote"
+            placeholder="Tambahkan catatan keputusan bila diperlukan..."
+          ></textarea>
+          <div class="action-row" style="margin-top: 12px">
+            <button class="btn" id="holdDecision">Tunda Keputusan</button>
+            <button class="btn warn" id="returnDecision">
+              Kembalikan ke Supervisor
+            </button>
+            <button class="btn primary" id="approveDecision">
+              Setujui Rekomendasi
+            </button>
+          </div>
+        </div>
+      </div>
+    </aside>
+    <div class="evidence-backdrop" id="evidenceBackdrop"></div>
+    <section
+      class="evidence-modal"
+      id="evidenceModal"
+      aria-modal="true"
+      role="dialog"
+    >
+      <div class="evidence-modal-head">
+        <div>
+          <h2 id="evidenceTitle">Bukti Pendukung</h2>
+          <div class="sub" id="evidenceModalMeta"></div>
+        </div>
+        <button class="close" id="closeEvidence">×</button>
+      </div>
+      <div class="evidence-modal-body">
+        <div class="evidence-preview" id="evidencePreview"></div>
+        <div class="review-grid">
+          <div class="card soft">
+            <div class="label">Sumber Bukti</div>
+            <div class="kv">
+              <span>Sistem / Pengunggah</span><b id="evidenceSource">—</b>
+            </div>
+            <div class="kv">
+              <span>Tanggal Bukti</span><b id="evidenceDate">—</b>
+            </div>
+          </div>
+          <div class="card soft">
+            <div class="label">Validasi Supervisor</div>
+            <div class="kv">
+              <span>Status</span><b id="evidenceStatus">—</b>
+            </div>
+            <div class="kv">
+              <span>Catatan Supervisor</span><b id="evidenceLastNote">—</b>
+            </div>
+            <div class="kv">
+              <span>Riwayat</span><b id="reviewHistory">—</b>
+            </div>
+          </div>
+        </div>
+        <div class="review-footer">
+          <div class="review-history">
+            Bukti bersifat read only untuk Head HC. Koreksi bukti dilakukan
+            melalui supervisor.
+          </div>
+          <div class="action-row">
+            <button class="btn primary" id="closeEvidenceAction">Tutup</button>
+          </div>
+        </div>
+      </div>
+    </section>
+    <div class="toast" id="toast">Tersimpan</div>
+
+    <script>
+      const regions = {
+        A: {
+          pop: 1100,
+          resolved: 1050,
+          evidence: 900,
+          affected: 770,
+          pathway: 540,
+          protection: 770,
+        },
+        B: {
+          pop: 543,
+          resolved: 498,
+          evidence: 364,
+          affected: 269,
+          pathway: 251,
+          protection: 269,
+        },
+        C: {
+          pop: 1357,
+          resolved: 750,
+          evidence: 336,
+          affected: 1061,
+          pathway: 698,
+          protection: 1061,
+        },
+      };
+
+      const canonicalTitles = [
+        {
+          id: "engineer",
+          local: "Engineer Regional",
+          grade: "G8",
+          region: "A",
+          family: "Field Operations",
+          domain: "ABCD",
+          level: "L3 Cakap",
+          band: "Field Device Operations",
+        },
+        {
+          id: "seniorTech",
+          local: "Senior Technician II",
+          grade: "G8",
+          region: "B",
+          family: "Field Operations",
+          domain: "ABCD",
+          level: "L3 Cakap",
+          band: "Field Device Operations",
+        },
+        {
+          id: "meterSenior",
+          local: "Teknisi XYZ Senior",
+          grade: "G8",
+          region: "C",
+          family: "Field Operations",
+          domain: "ABCD",
+          level: "L3 Cakap",
+          band: "Field Device Operations",
+        },
+      ];
+      const ABCDTasks = [
+        {
+          current: "Daftar rute manual",
+          status: "auto",
+          label: "Otomatis",
+          future: "Dispatch berbasis exception",
+          cap: "Digital workflow",
+        },
+        {
+          current: "Kunjungan pembacaan rutin",
+          status: "auto",
+          label: "Otomatis",
+          future: "Kunjungan berbasis exception",
+          cap: "Exception handling",
+        },
+        {
+          current: "Pencatatan xyz manual",
+          status: "auto",
+          label: "Otomatis",
+          future: "Data xyz masuk otomatis",
+          cap: "xyz platform",
+        },
+        {
+          current: "Input data manual",
+          status: "auto",
+          label: "Otomatis",
+          future: "Validasi data digital",
+          cap: "Digital verification",
+        },
+        {
+          current: "Inspeksi fisik perangkat",
+          status: "retain",
+          label: "Dipertahankan",
+          future: "Inspeksi perangkat pintar",
+          cap: "Field device operations",
+        },
+        {
+          current: "Diagnostik lapangan",
+          status: "elevate",
+          label: "Ditingkatkan",
+          future: "Diagnostik perangkat & jarak jauh",
+          cap: "Remote diagnostics",
+        },
+        {
+          current: "Eskalasi pengecualian",
+          status: "elevate",
+          label: "Ditingkatkan",
+          future: "AI-assisted exception handling",
+          cap: "Exception handling",
+        },
+        {
+          current: "—",
+          status: "new",
+          label: "Baru",
+          future: "Pemantauan OPQ IoT",
+          cap: "IoT OPQ",
+        },
+      ];
+      const capabilityTaxonomy = [
+        {
+          name: "KLMN Safety",
+          domain: "Safety",
+          current: "L4 Mahir",
+          target: "L4 Mahir",
+          status: "Memadai",
+        },
+        {
+          name: "XYZ Installation",
+          domain: "Field Device",
+          current: "L4 Mahir",
+          target: "L4 Mahir",
+          status: "Memadai",
+        },
+        {
+          name: "Device Diagnostics",
+          domain: "Field Device",
+          current: "L3 Cakap",
+          target: "L4 Mahir",
+          status: "Gap 1 level",
+        },
+        {
+          name: "IoT OPQ",
+          domain: "Digital / IoT",
+          current: "L1 Dasar",
+          target: "L3 Cakap",
+          status: "Gap 2 level",
+        },
+        {
+          name: "Remote Diagnostics",
+          domain: "Digital / IoT",
+          current: "L1 Dasar",
+          target: "L3 Cakap",
+          status: "Gap 2 level",
+        },
+        {
+          name: "XYZ Platform",
+          domain: "Digital Platform",
+          current: "L1 Dasar",
+          target: "L3 Cakap",
+          status: "Gap 2 level",
+        },
+      ];
+      let selectedCanonicalTitle = "engineer";
+
+      const identityOps = {
+        A: { review: 32, unresolved: 18, duplicates: 11, stewardResolved: 30 },
+        B: { review: 30, unresolved: 20, duplicates: 9, stewardResolved: 25 },
+        C: { review: 36, unresolved: 24, duplicates: 13, stewardResolved: 28 },
+      };
+      const identitySourceDefs = [
+        {
+          id: "sap",
+          name: "SAP ",
+          rate: 1,
+          status: "Anchor",
+          note: "System of record · identity anchor",
+        },
+        {
+          id: "lms",
+          name: "Moodle LMS",
+          rate: 0.88,
+          status: "Connected",
+          note: "Learner ID dipetakan ke Canonical ID",
+        },
+        {
+          id: "regional",
+          name: "Regional Performance",
+          rate: 0.91,
+          status: "Connected",
+          note: "ID regional dipetakan lintas wilayah",
+        },
+        {
+          id: "legacy",
+          name: "Legacy Competency",
+          rate: 0.55,
+          status: "Connected",
+          note: "Coverage historis terbatas",
+        },
+        {
+          id: "payroll",
+          name: "Oracle Payroll",
+          rate: 0,
+          status: "Restricted",
+          note: "Tidak terhubung · payroll off-limits",
+        },
+      ];
+      const identityRecords = [
+        {
+          id: "budi",
+          canonical: "MRD-P-048213",
+          name: "Budi Santoso",
+          region: "A",
+          grade: "G8",
+          confidence: 98,
+          status: "resolved",
+          reason:
+            "Anchor SAP, nama, wilayah, grade, dan histori sumber konsisten.",
+          steward: "Terhubung otomatis · tidak memerlukan review manual",
+          sources: [
+            ["SAP ", "UMN-48213", "Engineer Regional · G8 · Wilayah A"],
+            ["Moodle LMS", "lrnr_9981", "Budi Santoso · learning profile"],
+            [
+              "Regional Performance",
+              "WLY03-11821",
+              "Engineer Regional · Wilayah A",
+            ],
+            ["Legacy Competency", "WHV-2281", "Field Operations · ABCD"],
+          ],
+        },
+        {
+          id: "siti",
+          canonical: "MRD-P-011872",
+          name: "Siti Rahmawati",
+          region: "B",
+          grade: "G8",
+          confidence: 96,
+          status: "resolved",
+          reason:
+            "Empat sumber konsisten terhadap anchor SAP dan atribut organisasi.",
+          steward: "Terhubung otomatis · tidak memerlukan review manual",
+          sources: [
+            ["SAP ", "UMN-11872", "Senior Technician II · G8 · Wilayah B"],
+            ["Moodle LMS", "lrnr_4412", "Siti Rahmawati · learning profile"],
+            [
+              "Regional Performance",
+              "B-RP-8821",
+              "Senior Technician II · Wilayah B",
+            ],
+            ["Legacy Competency", "WHV-9044", "Field Device Operations"],
+          ],
+        },
+        {
+          id: "andi",
+          canonical: "MRD-P-029614",
+          name: "Andi Pratama",
+          region: "C",
+          grade: "G7",
+          confidence: 93,
+          status: "resolved",
+          reason:
+            "Anchor SAP dan ID regional konsisten; perbedaan singkatan nama di LMS sudah dinormalisasi.",
+          steward: "Terhubung otomatis setelah normalisasi nama",
+          sources: [
+            ["SAP ", "UMN-29614", "ABCD Officer · G7 · Wilayah C"],
+            ["Moodle LMS", "lrnr_6721", "Andi P. · learning profile"],
+            ["Regional Performance", "C-RP-2160", "ABCD Officer · Wilayah C"],
+          ],
+        },
+        {
+          id: "dedi",
+          canonical: "MRD-P-PENDING-014",
+          name: "Dedi Saputra",
+          region: "B",
+          grade: "G8",
+          confidence: 82,
+          status: "review",
+          reason:
+            "Nama dan grade cocok, tetapi satu record regional memakai ejaan “Deddy Saputra” dan belum ada bukti ketiga yang cukup kuat.",
+          steward:
+            "Data Steward perlu mengonfirmasi histori unit atau source document sebelum merge",
+          sources: [
+            ["SAP ", "UMN-33591", "Teknisi XYZ Senior · G8 · Wilayah D"],
+            ["Moodle LMS", "lrnr_3359", "Dedi Saputra · learning profile"],
+            [
+              "Regional Performance",
+              "D-RP-5528",
+              "Deddy Saputra · G8 · Wilayah D",
+            ],
+          ],
+        },
+        {
+          id: "arif",
+          canonical: "2 RECORD TERPISAH",
+          name: "Muhammad Arif",
+          region: "C",
+          grade: "G6 / G8",
+          confidence: 38,
+          status: "separate",
+          reason:
+            "Nama sama, tetapi grade, wilayah asal, dan histori jabatan bertentangan. CotSin tidak menggabungkan record.",
+          steward:
+            "Dipertahankan sebagai dua individu sampai terdapat bukti korelasi tambahan",
+          sources: [
+            ["SAP ", "UMN-39110", "ABCD Technician · G8 · Wilayah B"],
+            ["Moodle LMS", "lrnr_7732", "Muhammad Arif · G6 · Wilayah E"],
+          ],
+        },
+        {
+          id: "rina",
+          canonical: "BELUM TERBENTUK",
+          name: "Rina Kurnia",
+          region: "A",
+          grade: "G8",
+          confidence: 61,
+          status: "unresolved",
+          reason:
+            "Record regional dan LMS tersedia, tetapi anchor SAP belum dapat direkonsiliasi secara aman.",
+          steward:
+            "Cari anchor SAP / histori organisasi sebelum membuat Canonical Person ID",
+          sources: [
+            ["Moodle LMS", "lrnr_8402", "Rina Kurnia · learning profile"],
+            [
+              "Regional Performance",
+              "D-RP-1178",
+              "Teknisi XYZ Senior · G8 · Wilayah D",
+            ],
+          ],
+        },
+        {
+          id: "maya",
+          canonical: "MRD-P-043809",
+          name: "Maya Putri",
+          region: "C",
+          grade: "G7",
+          confidence: 97,
+          status: "resolved",
+          reason: "Anchor SAP dan dua sumber operasional konsisten.",
+          steward: "Terhubung otomatis",
+          sources: [
+            ["SAP ", "UMN-43809", "XYZ Operations Specialist · G7 · Wilayah C"],
+            ["Moodle LMS", "lrnr_9108", "Maya Putri · learning profile"],
+            [
+              "Regional Performance",
+              "C-RP-7012",
+              "XYZ Operations Specialist · Wilayah C",
+            ],
+          ],
+        },
+      ];
+
+      const jobFamilies = [
+        {
+          id: "field",
+          name: "Field ABCD & Manual Ops",
+          pop: 3000,
+          exposure: 70,
+          horizon: "9 bulan",
+          confidence: 92,
+          reskill: 86,
+          status: "Pilot aktif",
+          fact: true,
+        },
+        {
+          id: "admin",
+          name: "Routine Admin Processing",
+          pop: 4200,
+          exposure: 55,
+          horizon: "24–30 bulan",
+          confidence: 68,
+          reskill: 62,
+          status: "Pantau",
+          fact: false,
+        },
+        {
+          id: "contact",
+          name: "Contact Center Support",
+          pop: 3100,
+          exposure: 45,
+          horizon: "24–36 bulan",
+          confidence: 71,
+          reskill: 68,
+          status: "Pantau",
+          fact: false,
+        },
+        {
+          id: "maint",
+          name: "Maintenance Planning",
+          pop: 2400,
+          exposure: 32,
+          horizon: "30–36 bulan",
+          confidence: 66,
+          reskill: 73,
+          status: "Backlog",
+          fact: false,
+        },
+        {
+          id: "eng",
+          name: "Engineering Design",
+          pop: 1800,
+          exposure: 25,
+          horizon: "36+ bulan",
+          confidence: 74,
+          reskill: 81,
+          status: "Backlog",
+          fact: false,
+        },
+        {
+          id: "exec",
+          name: "Executive / Leadership",
+          pop: 420,
+          exposure: 12,
+          horizon: "36+ bulan",
+          confidence: 78,
+          reskill: 88,
+          status: "Rendah",
+          fact: false,
+        },
+      ];
+      const targetRoles = [
+        {
+          id: "smart",
+          name: "Operasional XYZ",
+          match: 82,
+          validation: 78,
+          regions: "A · B · C",
+          gaps: ["OPQ IoT", "Diagnosis jarak jauh", "Platform XYZ"],
+          candidates: 1260,
+        },
+        {
+          id: "iot",
+          name: "Pemeliharaan Perangkat IoT",
+          match: 74,
+          validation: 64,
+          regions: "A · C",
+          gaps: ["Protokol IoT", "Diagnostik OPQ", "Asset tagging"],
+          candidates: 780,
+        },
+        {
+          id: "grid",
+          name: "Inspeksi Aset Jaringan KLMN",
+          match: 69,
+          validation: 71,
+          regions: "B · C",
+          gaps: [
+            "Taksonomi aset jaringan",
+            "Perangkat inspeksi digital",
+            "Penilaian kondisi aset",
+          ],
+          candidates: 620,
+        },
+        {
+          id: "remote",
+          name: "Pemantauan Aset Jarak Jauh",
+          match: 66,
+          validation: 53,
+          regions: "A · B · C",
+          gaps: ["Remote monitoring", "Exception handling", "Dasar analitik"],
+          candidates: 540,
+        },
+        {
+          id: "digital",
+          name: "Operasional Lapangan Digital",
+          match: 63,
+          validation: 59,
+          regions: "C · B · A",
+          gaps: [
+            "Workflow digital",
+            "AI-assisted workflow",
+            "Kolaborasi jarak jauh",
+          ],
+          candidates: 490,
+        },
+        {
+          id: "customer",
+          name: "Layanan ABCD Pelanggan",
+          match: 59,
+          validation: 46,
+          regions: "B · C",
+          gaps: [
+            "Konsultasi ABCD",
+            "Perangkat pelanggan digital",
+            "Interpretasi analitis",
+          ],
+          candidates: 310,
+        },
+      ];
+      const people = [
+        {
+          name: "Budi Santoso",
+          region: "A",
+          grade: "G8",
+          title: "Engineer Regional",
+          target: "Operasional XYZ",
+          match: 82,
+          evidence: 64,
+          cohort: "Hampir Siap",
+          duration: "3–4 bulan",
+          validation: "Valid dengan catatan",
+          supervisor: "Agus Wijaya · Supervisor Field Ops",
+          supervisorRecommendation: "Reskilling terarah menuju Operasional XYZ",
+          supervisorNote:
+            "Bukti inti valid. Prioritaskan OPQ IoT, Diagnosis Jarak Jauh, dan Platform XYZ sebelum penempatan.",
+          headDecision: "Menunggu Keputusan",
+          headDecisionNote: "",
+          skills: [
+            ["KLMN safety", 92],
+            ["XYZ installation", 90],
+            ["Device diagnostics", 82],
+            ["IoT OPQ", 40],
+          ],
+          gaps: [
+            ["OPQ IoT", 46],
+            ["Diagnosis jarak jauh", 38],
+            ["Platform XYZ", 42],
+          ],
+        },
+        {
+          name: "Siti Rahmawati",
+          region: "B",
+          grade: "G8",
+          title: "Senior Technician II",
+          target: "Operasional XYZ",
+          match: 91,
+          evidence: 84,
+          cohort: "Siap Ditempatkan Ulang",
+          duration: "2–4 minggu",
+          validation: "Terverifikasi",
+          supervisor: "Rudi Hartono · Supervisor ABCD",
+          supervisorRecommendation: "Setujui penempatan ulang",
+          supervisorNote:
+            "Kapabilitas dan bukti memadai. Hanya membutuhkan onboarding workflow remote monitoring.",
+          headDecision: "Menunggu Keputusan",
+          headDecisionNote: "",
+          skills: [
+            ["KLMN safety", 94],
+            ["XYZ installation", 95],
+            ["Device diagnostics", 89],
+            ["XYZ basics", 79],
+          ],
+          gaps: [["Remote monitoring workflow", 62]],
+        },
+        {
+          name: "Andi Pratama",
+          region: "C",
+          grade: "G7",
+          title: "ABCD Officer",
+          target: "Pemeliharaan Perangkat IoT",
+          match: 74,
+          evidence: 78,
+          cohort: "Hampir Siap",
+          duration: "2–3 bulan",
+          validation: "Terverifikasi",
+          supervisor: "Dimas Saputra · Supervisor Field Technology",
+          supervisorRecommendation: "Reskilling ringan lalu penempatan ulang",
+          supervisorNote:
+            "Fondasi diagnostik kuat. Perlu penguatan Protokol IoT dan Diagnostik OPQ.",
+          headDecision: "Menunggu Keputusan",
+          headDecisionNote: "",
+          skills: [
+            ["Diagnostik lapangan", 85],
+            ["Instalasi perangkat", 89],
+            ["Keselamatan KLMN", 90],
+          ],
+          gaps: [
+            ["Protokol IoT", 44],
+            ["Diagnostik OPQ", 48],
+          ],
+        },
+        {
+          name: "Rina Kurnia",
+          region: "C",
+          grade: "G8",
+          title: "Teknisi XYZ Senior",
+          target: "Inspeksi Aset Jaringan KLMN",
+          match: 69,
+          evidence: 58,
+          cohort: "Reskilling Terstruktur",
+          duration: "4–6 bulan",
+          validation: "Perlu klarifikasi bukti",
+          supervisor: "Nina Amelia · Supervisor Asset Field",
+          supervisorRecommendation:
+            "Tunda penempatan; lengkapi bukti lalu reskilling terstruktur",
+          supervisorNote:
+            "Bukti inspeksi digital belum cukup jelas. Minta pembaruan sebelum keputusan penempatan.",
+          headDecision: "Menunggu Keputusan",
+          headDecisionNote: "",
+          skills: [
+            ["Inspeksi lapangan", 87],
+            ["Kepatuhan keselamatan", 91],
+            ["Pekerjaan area pelanggan", 82],
+          ],
+          gaps: [
+            ["Taksonomi aset jaringan", 41],
+            ["Perangkat inspeksi digital", 35],
+            ["Penilaian kondisi aset", 38],
+          ],
+        },
+        {
+          name: "Fajar Nugroho",
+          region: "B",
+          grade: "G6",
+          title: "Pembaca XYZ Senior",
+          target: "Pemantauan Aset Jarak Jauh",
+          match: 66,
+          evidence: 49,
+          cohort: "Reskilling Terstruktur",
+          duration: "5–6 bulan",
+          validation: "Valid terbatas",
+          supervisor: "Rizky Maulana · Supervisor Operations",
+          supervisorRecommendation:
+            "Reskilling terstruktur dengan validasi kebutuhan wilayah",
+          supervisorNote:
+            "Kapabilitas dasar cukup, namun bukti digital terbatas. Pastikan demand Pemantauan Aset Jarak Jauh di Wilayah B sebelum investasi training.",
+          headDecision: "Menunggu Keputusan",
+          headDecisionNote: "",
+          skills: [
+            ["Operasi XYZ", 88],
+            ["Identifikasi anomali", 69],
+            ["Eksekusi rute", 92],
+          ],
+          gaps: [
+            ["Pemantauan jarak jauh", 28],
+            ["Pengecualian digital", 32],
+            ["Dasar IoT", 25],
+          ],
+        },
+        {
+          name: "Dewi Lestari",
+          region: "A",
+          grade: "G7",
+          title: "Field Operations Officer",
+          target: "Operasional Lapangan Digital",
+          match: 63,
+          evidence: 73,
+          cohort: "Hampir Siap",
+          duration: "2–3 bulan",
+          validation: "Terverifikasi",
+          supervisor: "Wahyu Setiawan · Supervisor Digital Field",
+          supervisorRecommendation:
+            "Reskilling ringan menuju Operasional Lapangan Digital",
+          supervisorNote:
+            "Bukti workflow mobile memadai. Fokus pada workflow berbantuan AI dan kolaborasi jarak jauh.",
+          headDecision: "Menunggu Keputusan",
+          headDecisionNote: "",
+          skills: [
+            ["Operasi lapangan", 90],
+            ["Diagnostik perangkat", 78],
+            ["Workflow mobile", 82],
+          ],
+          gaps: [
+            ["Workflow berbantuan AI", 48],
+            ["Kolaborasi jarak jauh", 52],
+          ],
+        },
+        {
+          name: "Yusuf Hidayat",
+          region: "A",
+          grade: "G6",
+          title: "Teknisi ABCD",
+          target: "Layanan ABCD Pelanggan",
+          match: 59,
+          evidence: 44,
+          cohort: "Manajemen Transisi",
+          duration: "Perlu jalur alternatif",
+          validation: "Valid terbatas",
+          supervisor: "Agus Wijaya · Supervisor Field Ops",
+          supervisorRecommendation:
+            "Alihkan ke Manajemen Transisi dan cari peran alternatif",
+          supervisorNote:
+            "Kesesuaian terhadap target saat ini rendah. Jangan memaksakan reskilling; evaluasi penugasan proyek, lowongan regional, atau jalur alternatif.",
+          headDecision: "Menunggu Keputusan",
+          headDecisionNote: "",
+          skills: [
+            ["Pekerjaan area pelanggan", 84],
+            ["Pembacaan XYZ", 91],
+            ["Dasar keselamatan", 76],
+          ],
+          gaps: [
+            ["Konsultasi ABCD", 24],
+            ["Perangkat pelanggan digital", 30],
+            ["Interpretasi analitis", 26],
+          ],
+        },
+        {
+          name: "Maya Putri",
+          region: "C",
+          grade: "G7",
+          title: "XYZ Operations Specialist",
+          target: "Operasional XYZ",
+          match: 86,
+          evidence: 81,
+          cohort: "Siap Ditempatkan Ulang",
+          duration: "2–4 minggu",
+          validation: "Terverifikasi",
+          supervisor: "Dimas Saputra · Supervisor Field Technology",
+          supervisorRecommendation: "Setujui penempatan ulang",
+          supervisorNote:
+            "Kesesuaian dan bukti tinggi. Siap untuk onboarding singkat pada advanced OPQ.",
+          headDecision: "Menunggu Keputusan",
+          headDecisionNote: "",
+          skills: [
+            ["Device diagnostics", 91],
+            ["XYZ installation", 89],
+            ["Digital ticketing", 83],
+          ],
+          gaps: [["Advanced OPQ", 61]],
+        },
+      ];
+      const evidenceStatusDelta = {
+        pending: 0,
+        accepted: 3,
+        resubmit: -2,
+        rejected: -4,
+      };
+      const evidenceStatusLabel = {
+        pending: "Belum Direview",
+        accepted: "Valid",
+        resubmit: "Perlu Kirim Ulang",
+        rejected: "Tidak Valid",
+      };
+      people.forEach((p, i) => {
+        p.baseEvidence = p.evidence;
+        const verified = p.validation === "Terverifikasi";
+        const clarify = p.validation === "Perlu klarifikasi bukti";
+        const limited = p.validation === "Valid terbatas";
+        p.evidenceDocs = [
+          {
+            id: "cert",
+            title: "Sertifikat Keselamatan KLMN",
+            type: "Sertifikat",
+            source: "LMS / Learning Record",
+            date: ["12 Jul 2026", "04 Jul 2026", "19 Jun 2026"][i % 3],
+            status: "accepted",
+            baseStatus: "accepted",
+            note: "Dokumen valid dan masih berlaku.",
+            reviewedAt: "Supervisor · 12 Agu 2026",
+          },
+          {
+            id: "assignment",
+            title: "Riwayat Penugasan & Evaluasi Lapangan",
+            type: "Riwayat Kinerja",
+            source: "Regional Performance",
+            date: ["28 Jul 2026", "25 Jul 2026", "21 Jul 2026"][i % 3],
+            status: clarify ? "resubmit" : "accepted",
+            baseStatus: clarify ? "resubmit" : "accepted",
+            note: clarify
+              ? "Lampiran evaluasi lapangan belum lengkap. Supervisor meminta halaman penilaian digital."
+              : "Riwayat penugasan relevan dan konsisten dengan profil kapabilitas.",
+            reviewedAt: "Supervisor · 13 Agu 2026",
+          },
+          {
+            id: "fieldproof",
+            title: "Bukti Diagnostik / Pekerjaan Perangkat",
+            type: "Foto & Catatan Lapangan",
+            source: "Employee Evidence Upload",
+            date: ["02 Agu 2026", "31 Jul 2026", "29 Jul 2026"][i % 3],
+            status: clarify || limited ? "resubmit" : "accepted",
+            baseStatus: clarify || limited ? "resubmit" : "accepted",
+            note: clarify
+              ? "Bukti tidak cukup jelas; minta unggahan ulang dengan foto dan ID pekerjaan yang terbaca."
+              : limited
+                ? "Bukti tersedia tetapi kualitasnya terbatas; gunakan dengan tingkat keandalan konservatif."
+                : "Bukti lapangan valid dan mendukung penilaian supervisor.",
+            reviewedAt: "Supervisor · 14 Agu 2026",
+          },
+        ];
+      });
+      let selectedRegion = "ALL",
+        selectedJob = "field",
+        selectedRole = "smart",
+        selectedIdentity = "budi",
+        identityFilter = "ALL";
+      let econ = { hires: 2100, cost: 60, program: 60.2, consult: 3.5 };
+      const contextNames = {
+        summary: "Ringkasan",
+        identity: "Resolusi Identitas",
+        architecture: "Arsitektur Pekerjaan",
+        exposure: "Paparan",
+        transition: "Portofolio Transisi",
+        people: "Karyawan",
+        economics: "Ekonomi",
+        decision: "Keputusan",
+      };
+      const $ = (id) => document.getElementById(id);
+      const fmtInt = (n) => Math.round(n).toLocaleString("id-ID");
+      const pct = (n) =>
+        n.toLocaleString("id-ID", {
+          minimumFractionDigits: 1,
+          maximumFractionDigits: 1,
+        }) + "%";
+      function nowText() {
+        return (
+          new Intl.DateTimeFormat("id-ID", {
+            hour: "2-digit",
+            minute: "2-digit",
+            second: "2-digit",
+          }).format(new Date()) + " WIB"
+        );
+      }
+      function getRegion() {
+        if (selectedRegion !== "ALL")
+          return {
+            ...regions[selectedRegion],
+            name: "Wilayah " + selectedRegion,
+          };
+        const vals = Object.values(regions);
+        return vals.reduce(
+          (a, r) => (
+            (a.pop += r.pop),
+            (a.resolved += r.resolved),
+            (a.evidence += r.evidence),
+            (a.affected += r.affected),
+            (a.pathway += r.pathway),
+            (a.protection += r.protection),
+            a
+          ),
+          {
+            pop: 0,
+            resolved: 0,
+            evidence: 0,
+            affected: 0,
+            pathway: 0,
+            protection: 0,
+            name: "Semua Wilayah",
+          },
+        );
+      }
+      function headDecisionMetrics() {
+        const scope =
+          selectedRegion === "ALL"
+            ? people
+            : people.filter((p) => p.region === selectedRegion);
+        const total = scope.length || 1;
+        const approved = scope.filter(
+          (p) => p.headDecision === "Disetujui",
+        ).length;
+        const returned = scope.filter(
+          (p) => p.headDecision === "Dikembalikan ke Supervisor",
+        ).length;
+        const held = scope.filter((p) => p.headDecision === "Ditunda").length;
+        const pending = scope.filter(
+          (p) => p.headDecision === "Menunggu Keputusan",
+        ).length;
+        // Head HC progress is a governance-progress indicator, not a capability score.
+        // Approved = 100%, held = 50%, returned = 25%, pending = 0%.
+        const progress =
+          ((approved * 1 + held * 0.5 + returned * 0.25) / total) * 100;
+        return { total, approved, returned, held, pending, progress };
+      }
+      function metrics() {
+        const r = getRegion(),
+          visibility = (r.resolved / r.pop) * 100,
+          evidence = (r.evidence / r.pop) * 100,
+          coverage = (r.pathway / r.affected) * 100,
+          protection = (r.protection / r.affected) * 100,
+          gross = (econ.hires * econ.cost) / 1000,
+          ratio = gross / econ.program,
+          h = headDecisionMetrics();
+        const technicalReadiness = Math.min(
+          100,
+          Math.min(
+            visibility / 95,
+            evidence / 80,
+            coverage / 70,
+            protection / 100,
+            ratio / 1,
+          ) * 100,
+        );
+        // Scale-up readiness blends proof quality (80%) with completion of Head HC governance decisions (20%).
+        const readiness = Math.min(
+          100,
+          technicalReadiness * 0.8 + h.progress * 0.2,
+        );
+        return {
+          r,
+          visibility,
+          evidence,
+          coverage,
+          protection,
+          gross,
+          ratio,
+          technicalReadiness,
+          readiness,
+          headDecision: h,
+          net: gross - econ.program,
+          be: Math.ceil((econ.program * 1000) / econ.cost),
+          cbe: Math.ceil((econ.consult * 1000) / econ.cost),
+        };
+      }
+      function statusTag(value, target) {
+        return value >= target
+          ? ["Tercapai", "good"]
+          : value >= target * 0.9
+            ? ["Dalam jalur", "warn"]
+            : ["Perlu perhatian", "risk"];
+      }
+      function setTarget(value, target, valEl, tagEl, barEl, format = pct) {
+        const [txt, cls] = statusTag(value, target);
+        $(valEl).textContent = format(value);
+        $(tagEl).textContent = txt;
+        $(tagEl).className = "tag " + cls;
+        $(barEl).style.width = Math.min(100, (value / target) * 100) + "%";
+        $(barEl).className =
+          value >= target ? "" : value >= target * 0.9 ? "warn" : "risk";
+      }
+      function renderSummary() {
+        const m = metrics();
+        $("sumAffected").textContent = "~" + fmtInt(m.r.affected);
+        $("sumPilot").textContent = fmtInt(m.r.pop);
+        setTarget(m.visibility, 95, "visValue", "visTag", "visBar");
+        setTarget(m.evidence, 80, "evidValue", "evidTag", "evidBar");
+        setTarget(m.coverage, 70, "pathValue", "pathTag", "pathBar");
+        $("pathDecisionMeta").textContent =
+          `${m.headDecision.approved}/${m.headDecision.total} rekomendasi disetujui Head HC`;
+        const econStatus = statusTag(m.ratio, 1);
+        $("econValue").textContent =
+          m.ratio.toLocaleString("id-ID", {
+            minimumFractionDigits: 1,
+            maximumFractionDigits: 1,
+          }) + "×";
+        $("econTag").textContent = econStatus[0];
+        $("econTag").className = "tag " + econStatus[1];
+        $("econBar").style.width = Math.min(100, m.ratio * 100) + "%";
+        $("econBar").className = m.ratio >= 1 ? "" : "risk";
+        const sc = statusTag(m.readiness, 100);
+        $("scaleValue").textContent = Math.round(m.readiness) + "%";
+        $("scaleTag").textContent = sc[0];
+        $("scaleTag").className = "tag " + sc[1];
+        $("scaleBar").style.width = m.readiness + "%";
+        $("scaleBar").className =
+          m.readiness >= 100 ? "" : m.readiness >= 90 ? "warn" : "risk";
+        $("scaleDecisionMeta").textContent =
+          `Keputusan Head HC ${Math.round(m.headDecision.progress)}%`;
+        const alerts = [];
+        if (m.evidence < 80)
+          alerts.push({
+            type: "risk",
+            icon: "!",
+            title: "Keandalan bukti belum mencapai target",
+            text: `${pct(m.evidence)} saat ini · target 80%`,
+          });
+        if (m.coverage < 70)
+          alerts.push({
+            type: "risk",
+            icon: "!",
+            title: "Cakupan penempatan ulang belum cukup",
+            text: `${pct(m.coverage)} saat ini · target 70%`,
+          });
+        if (m.headDecision.pending > 0)
+          alerts.push({
+            type: "warn",
+            icon: "→",
+            title: `${m.headDecision.pending} rekomendasi menunggu keputusan Head HC`,
+            text: `${m.headDecision.approved} disetujui · ${m.headDecision.held} ditunda · ${m.headDecision.returned} dikembalikan`,
+          });
+        if (selectedRegion === "ALL") {
+          const worst = Object.entries(regions)
+            .map(([k, r]) => [k, (r.evidence / r.pop) * 100])
+            .sort((a, b) => a[1] - b[1])[0];
+          alerts.push({
+            type: "warn",
+            icon: "↗",
+            title: `Wilayah ${worst[0]} membutuhkan validasi lebih cepat`,
+            text: `Keandalan bukti ${pct(worst[1])}`,
+          });
+        } else {
+          alerts.push({
+            type: "good",
+            icon: "✓",
+            title: "Perlindungan pekerja terjaga",
+            text: "100% rekomendasi menggunakan validasi manusia & jalur banding",
+          });
+        }
+        $("alerts").innerHTML = alerts
+          .slice(0, 3)
+          .map(
+            (a) =>
+              `<div class="alert ${a.type}"><div class="ico">${a.icon}</div><div><b>${a.title}</b><p>${a.text}</p></div></div>`,
+          )
+          .join("");
+      }
+
+      function getIdentityOps() {
+        if (selectedRegion !== "ALL") {
+          const r = regions[selectedRegion],
+            o = identityOps[selectedRegion];
+          return {
+            pop: r.pop,
+            resolved: r.resolved,
+            review: o.review,
+            unresolved: o.unresolved,
+            duplicates: o.duplicates,
+            stewardResolved: o.stewardResolved,
+            name: "Wilayah " + selectedRegion,
+          };
+        }
+        const vals = Object.keys(regions);
+        return vals.reduce(
+          (a, k) => {
+            a.pop += regions[k].pop;
+            a.resolved += regions[k].resolved;
+            a.review += identityOps[k].review;
+            a.unresolved += identityOps[k].unresolved;
+            a.duplicates += identityOps[k].duplicates;
+            a.stewardResolved += identityOps[k].stewardResolved;
+            return a;
+          },
+          {
+            pop: 0,
+            resolved: 0,
+            review: 0,
+            unresolved: 0,
+            duplicates: 0,
+            stewardResolved: 0,
+            name: "Semua Wilayah",
+          },
+        );
+      }
+      function identityStatusMeta(status) {
+        if (status === "resolved")
+          return { label: "Terhubung", cls: "resolved" };
+        if (status === "review")
+          return { label: "Perlu Review", cls: "review" };
+        if (status === "separate")
+          return { label: "Tidak Digabung", cls: "separate" };
+        return { label: "Belum Terhubung", cls: "unresolved" };
+      }
+      function renderIdentity() {
+        const o = getIdentityOps();
+        $("identityRegionLabel").textContent = o.name;
+        $("identityPopulation").textContent = fmtInt(o.pop);
+        $("identityResolved").textContent = fmtInt(o.resolved);
+        $("identityResolvedPct").textContent =
+          `${pct((o.resolved / o.pop) * 100)} dari populasi`;
+        $("identityReview").textContent = fmtInt(o.review);
+        $("identityUnresolved").textContent = fmtInt(o.unresolved);
+
+        $("identitySources").innerHTML = identitySourceDefs
+          .map((s) => {
+            if (s.status === "Restricted") {
+              return `<div class="source-card restricted"><div class="source-name">${s.name}</div><div class="source-count">—</div><small><span class="tag gray">Restricted</span></small></div>`;
+            }
+            const count = Math.round(o.pop * s.rate),
+              coverage = (count / o.pop) * 100;
+            return `<div class="source-card"><div class="source-name">${s.name}</div><div class="source-count">${fmtInt(count)}</div><small>${pct(coverage)} coverage</small><small style="margin-top:5px"><span class="tag ${s.id === "sap" ? "good" : "gray"}">${s.status}</span></small></div>`;
+          })
+          .join("");
+
+        let rows =
+          selectedRegion === "ALL"
+            ? identityRecords
+            : identityRecords.filter((r) => r.region === selectedRegion);
+        if (identityFilter !== "ALL")
+          rows = rows.filter((r) => r.status === identityFilter);
+
+        if (!rows.length) {
+          $("identityBody").innerHTML =
+            '<tr><td colspan="6">Tidak ada record pada filter ini.</td></tr>';
+          $("identityDetail").innerHTML =
+            '<div class="label">Detail</div><h3>Tidak ada record</h3>';
+          $("identityResultMeta").textContent = "0 record";
+          return;
+        }
+        if (!rows.some((r) => r.id === selectedIdentity))
+          selectedIdentity = rows[0].id;
+        $("identityResultMeta").textContent = `${rows.length} sample record`;
+
+        $("identityBody").innerHTML = rows
+          .map((r) => {
+            const s = identityStatusMeta(r.status);
+            return `<tr class="${selectedIdentity === r.id ? "active" : ""}" data-identity="${r.id}">
+     <td><b>${r.canonical}</b>${r.priority ? '<br><span class="priority-flag">Prioritas Head HC</span>' : ""}</td>
+     <td><b>${r.name}</b><small>${r.grade}</small></td>
+     <td>Wilayah ${r.region}</td>
+     <td>${r.sources.length} sumber</td>
+     <td>${r.confidence}%</td>
+     <td><span class="identity-status ${s.cls}">${s.label}</span></td>
+   </tr>`;
+          })
+          .join("");
+        document.querySelectorAll("[data-identity]").forEach(
+          (row) =>
+            (row.onclick = () => {
+              selectedIdentity = row.dataset.identity;
+              renderIdentity();
+            }),
+        );
+
+        const r = identityRecords.find((x) => x.id === selectedIdentity),
+          s = identityStatusMeta(r.status);
+        const canPrioritize = r.status !== "resolved";
+        $("identityDetail").innerHTML = `
+   <div class="label">Canonical Person</div>
+   <div class="canonical-box">
+     <small>${r.name} · Wilayah ${r.region} · ${r.grade}</small>
+     <div class="canonical-id">${r.canonical}</div>
+     <span class="identity-status ${s.cls}">${s.label}</span>
+     ${r.priority ? '<span class="priority-flag" style="margin-left:5px">Prioritas Head HC</span>' : ""}
+   </div>
+   <div class="kv"><span>Match Confidence</span><b>${r.confidence}%</b></div>
+   <div class="kv"><span>Hasil</span><b>${r.reason}</b></div>
+   <div class="kv"><span>Tindak Lanjut</span><b>${r.steward}</b></div>
+   ${canPrioritize ? `<button class="btn primary" style="width:100%;margin-top:10px" data-priority-identity="${r.id}">${r.priority ? "Prioritas Sudah Ditetapkan" : "Prioritaskan Penyelesaian"}</button>` : ""}
+   <div class="section-title" style="margin-top:14px"><h2>Source Records</h2></div>
+   <div class="source-records">
+     ${r.sources.map((x) => `<div class="source-record"><div class="record-head"><b>${x[0]}</b><span class="tag gray">${x[1]}</span></div><small>${x[2]}</small></div>`).join("")}
+   </div>`;
+        document.querySelectorAll("[data-priority-identity]").forEach(
+          (b) =>
+            (b.onclick = () => {
+              const rec = identityRecords.find(
+                (x) => x.id === b.dataset.priorityIdentity,
+              );
+              rec.priority = true;
+              showToast("Prioritas penyelesaian dikirim ke Data Steward");
+              renderIdentity();
+            }),
+        );
+      }
+      function exportIdentityExceptions() {
+        const rows = identityRecords.filter(
+          (r) =>
+            r.status !== "resolved" &&
+            (selectedRegion === "ALL" || r.region === selectedRegion),
+        );
+        const esc = (v) => '"' + String(v ?? "").replaceAll('"', '""') + '"';
+        const csv = [
+          "Canonical ID,Nama,Wilayah,Grade,Confidence,Status,Tindak Lanjut",
+        ]
+          .concat(
+            rows.map((r) =>
+              [
+                r.canonical,
+                r.name,
+                r.region,
+                r.grade,
+                r.confidence,
+                identityStatusMeta(r.status).label,
+                r.steward,
+              ]
+                .map(esc)
+                .join(","),
+            ),
+          )
+          .join("\n");
+        const blob = new Blob([csv], { type: "text/csv;charset=utf-8" });
+        const url = URL.createObjectURL(blob),
+          a = document.createElement("a");
+        a.href = url;
+        a.download = "CotSin_identity_exceptions.csv";
+        a.click();
+        setTimeout(() => URL.revokeObjectURL(url), 1000);
+        showToast(`${rows.length} exception diekspor`);
+      }
+      function renderArchitecture() {
+        $("localTitleList").innerHTML = canonicalTitles
+          .map(
+            (
+              t,
+            ) => `<div class="title-item ${selectedCanonicalTitle === t.id ? "active" : ""}" data-canonical-title="${t.id}">
+   <b>${t.local}</b><small>${t.grade} · Wilayah ${t.region}</small>
+ </div>`,
+          )
+          .join("");
+        document.querySelectorAll("[data-canonical-title]").forEach(
+          (x) =>
+            (x.onclick = () => {
+              selectedCanonicalTitle = x.dataset.canonicalTitle;
+              renderArchitecture();
+            }),
+        );
+        const t = canonicalTitles.find((x) => x.id === selectedCanonicalTitle);
+        $("canonicalJobDetail").innerHTML =
+          `<div class="label">Hasil Mapping</div>
+   <h3>${t.local}</h3>
+   <div class="arch-fields">
+     <div class="arch-field"><small>Job Family</small><b>${t.family}</b></div>
+     <div class="arch-field"><small>Domain</small><b>${t.domain}</b></div>
+     <div class="arch-field"><small>Level</small><b>${t.level}</b></div>
+     <div class="arch-field"><small>Capability Band</small><b>${t.band}</b></div>
+   </div>`;
+        const auto = ABCDTasks.filter((x) => x.status === "auto").length,
+          retained = ABCDTasks.filter((x) => x.status === "retain").length,
+          elevated = ABCDTasks.filter((x) => x.status === "elevate").length,
+          added = ABCDTasks.filter((x) => x.status === "new").length;
+        $("taskSummary").textContent =
+          `${auto} otomatis · ${retained} dipertahankan · ${elevated} ditingkatkan · ${added} baru`;
+        $("taskBody").innerHTML = ABCDTasks.map(
+          (x) => `<tr>
+   <td>${x.current}</td>
+   <td><span class="status-pill ${x.status}">${x.label}</span></td>
+   <td><b>${x.future}</b></td>
+   <td>${x.cap}</td>
+ </tr>`,
+        ).join("");
+        $("taxonomyGrid").innerHTML = capabilityTaxonomy
+          .map(
+            (x) => `<div class="taxonomy-item">
+   <div class="tax-head"><b>${x.name}</b><span class="tag ${x.status === "Memadai" ? "good" : "warn"}">${x.status}</span></div>
+   <small>${x.domain}</small>
+   <div class="kv"><span>Saat ini</span><b>${x.current}</b></div>
+   <div class="kv"><span>Target</span><b>${x.target}</b></div>
+ </div>`,
+          )
+          .join("");
+      }
+      function renderExposure() {
+        const tbody = $("exposureTable").querySelector("tbody");
+        tbody.innerHTML = jobFamilies
+          .map(
+            (
+              j,
+            ) => `<tr class="click ${selectedJob === j.id ? "selected-row" : ""}" data-job="${j.id}">
+   <td><span class="role-name">${j.name}</span></td>
+   <td>${fmtInt(j.pop)}</td>
+   <td><div style="display:grid;grid-template-columns:1fr 36px;gap:8px;align-items:center"><div class="bar"><i class="${j.exposure >= 60 ? "high" : j.exposure >= 40 ? "med" : ""}" style="width:${j.exposure}%"></i></div><b>${j.exposure}%</b></div></td>
+   <td>${j.horizon}</td>
+   <td>${j.confidence}%</td>
+   <td>${j.reskill}%</td>
+   <td><span class="tag ${j.fact ? "good" : "gray"}">${j.status}</span></td>
+ </tr>`,
+          )
+          .join("");
+        tbody.querySelectorAll("tr").forEach(
+          (r) =>
+            (r.onclick = () => {
+              selectedJob = r.dataset.job;
+              renderExposure();
+            }),
+        );
+        const j = jobFamilies.find((x) => x.id === selectedJob),
+          m = metrics();
+        const affected =
+          j.id === "field"
+            ? m.r.affected
+            : Math.round((j.pop * j.exposure) / 100);
+        $("exposureDetail").innerHTML =
+          `<div class="label">Rumpun Terpilih</div>
+   <h3>${j.name}</h3>
+   <div class="big">${j.exposure}%</div>
+   <div class="kv"><span>Populasi</span><b>${j.id === "field" ? fmtInt(m.r.pop) : fmtInt(j.pop)}</b></div>
+   <div class="kv"><span>Ekuivalen pekerjaan terdampak</span><b>${fmtInt(affected)}</b></div>
+   <div class="kv"><span>Keandalan data</span><b>${j.confidence}%</b></div>
+   <div class="kv"><span>Kelayakan reskilling</span><b>${j.reskill}%</b></div>
+   <div class="kv"><span>Horizon</span><b>${j.horizon}</b></div>
+   ${j.id === "field" ? '<button class="btn primary" style="width:100%;margin-top:12px" data-go="transition">Buka jalur penempatan ulang</button>' : ""}`;
+        document
+          .querySelectorAll("[data-go]")
+          .forEach((b) => (b.onclick = () => go(b.dataset.go)));
+      }
+      function renderTransition() {
+        const m = metrics(),
+          factor = m.r.affected / 4200;
+        const ready = Math.round(900 * factor),
+          near = Math.round(1500 * factor),
+          reskill = Math.round(1200 * factor),
+          trans = Math.max(0, m.r.affected - ready - near - reskill);
+
+        $("transAffected").textContent = "~" + fmtInt(m.r.affected);
+        $("cohortReady").textContent = fmtInt(ready);
+        $("cohortNear").textContent = fmtInt(near);
+        $("cohortReskill").textContent = fmtInt(reskill);
+        $("cohortTransition").textContent = fmtInt(trans);
+        $("cohortStack").innerHTML = [ready, near, reskill, trans]
+          .map(
+            (v) => `<span style="width:${(v / m.r.affected) * 100}%"></span>`,
+          )
+          .join("");
+
+        // Head HC decision progress uses the employee sample in the currently selected region.
+        const scope =
+          selectedRegion === "ALL"
+            ? people
+            : people.filter((p) => p.region === selectedRegion);
+        const decisionStats = {
+          approved: scope.filter((p) => p.headDecision === "Disetujui").length,
+          pending: scope.filter((p) => p.headDecision === "Menunggu Keputusan")
+            .length,
+          held: scope.filter((p) => p.headDecision === "Ditunda").length,
+          returned: scope.filter(
+            (p) => p.headDecision === "Dikembalikan ke Supervisor",
+          ).length,
+        };
+        $("portfolioApproved").textContent = decisionStats.approved;
+        $("portfolioPending").textContent = decisionStats.pending;
+        $("portfolioHeld").textContent = decisionStats.held;
+        $("portfolioReturned").textContent = decisionStats.returned;
+
+        const cohortDecision = (name) => {
+          const rows = scope.filter((p) => p.cohort === name);
+          const approved = rows.filter(
+            (p) => p.headDecision === "Disetujui",
+          ).length;
+          return `${approved}/${rows.length} disetujui`;
+        };
+        $("cohortReadyDecision").textContent = cohortDecision(
+          "Siap Ditempatkan Ulang",
+        );
+        $("cohortNearDecision").textContent = cohortDecision("Hampir Siap");
+        $("cohortReskillDecision").textContent = cohortDecision(
+          "Reskilling Terstruktur",
+        );
+        $("cohortTransitionDecision").textContent =
+          cohortDecision("Manajemen Transisi");
+
+        $("roleGrid").innerHTML = targetRoles
+          .map((r) => {
+            const rolePeople = scope.filter((p) => p.target === r.name);
+            const approved = rolePeople.filter(
+              (p) => p.headDecision === "Disetujui",
+            ).length;
+            const pending = rolePeople.filter(
+              (p) => p.headDecision === "Menunggu Keputusan",
+            ).length;
+            const held = rolePeople.filter(
+              (p) => p.headDecision === "Ditunda",
+            ).length;
+            const returned = rolePeople.filter(
+              (p) => p.headDecision === "Dikembalikan ke Supervisor",
+            ).length;
+            return `<div class="role-card ${selectedRole === r.id ? "active" : ""}" data-role="${r.id}">
+      <div class="role-top"><h3>${r.name}</h3><strong>${r.match}%</strong></div>
+      <small>${fmtInt(Math.round(r.candidates * factor))} kandidat potensial</small>
+      <div class="need"><span>Validasi kebutuhan</span><b>${r.validation}%</b></div>
+      <div class="progress"><i class="${r.validation < 60 ? "warn" : ""}" style="width:${r.validation}%"></i></div>
+      <div class="role-decision">
+        <span class="tag good">${approved} disetujui</span>
+        ${pending ? `<span class="tag gray">${pending} menunggu</span>` : ""}
+        ${held ? `<span class="tag warn">${held} ditunda</span>` : ""}
+        ${returned ? `<span class="tag warn">${returned} dikembalikan</span>` : ""}
+      </div>
+   </div>`;
+          })
+          .join("");
+
+        document.querySelectorAll("[data-role]").forEach(
+          (x) =>
+            (x.onclick = () => {
+              selectedRole = x.dataset.role;
+              renderTransition();
+            }),
+        );
+
+        const r = targetRoles.find((x) => x.id === selectedRole);
+        const rolePeople = scope.filter((p) => p.target === r.name);
+        const approved = rolePeople.filter(
+          (p) => p.headDecision === "Disetujui",
+        ).length;
+        const pending = rolePeople.filter(
+          (p) => p.headDecision === "Menunggu Keputusan",
+        ).length;
+        const held = rolePeople.filter(
+          (p) => p.headDecision === "Ditunda",
+        ).length;
+        const returned = rolePeople.filter(
+          (p) => p.headDecision === "Dikembalikan ke Supervisor",
+        ).length;
+
+        $("roleDetail").innerHTML = `<div class="label">Peran Tujuan</div>
+   <h3>${r.name}</h3>
+   <div class="big">${r.match}%</div>
+   <div class="kv"><span>Kesesuaian kapabilitas</span><b>${r.match}%</b></div>
+   <div class="kv"><span>Validasi kebutuhan</span><b>${r.validation}%</b></div>
+   <div class="kv"><span>Wilayah aktif</span><b>${r.regions}</b></div>
+   <div class="kv"><span>Kandidat potensial</span><b>${fmtInt(Math.round(r.candidates * factor))}</b></div>
+   <div class="section-title" style="margin-top:14px"><h2>Keputusan Head HC</h2></div>
+   <div class="kv"><span>Disetujui</span><b>${approved}</b></div>
+   <div class="kv"><span>Menunggu keputusan</span><b>${pending}</b></div>
+   <div class="kv"><span>Ditunda</span><b>${held}</b></div>
+   <div class="kv"><span>Dikembalikan ke Supervisor</span><b>${returned}</b></div>
+   <div class="section-title" style="margin-top:14px"><h2>Kesenjangan utama</h2></div>
+   ${r.gaps.map((g) => `<div class="kv"><span>${g}</span><b>Perlu ditutup</b></div>`).join("")}
+   <button class="btn primary" style="width:100%;margin-top:12px" data-go="people">Lihat kandidat</button>`;
+
+        document
+          .querySelectorAll("[data-go]")
+          .forEach((b) => (b.onclick = () => go(b.dataset.go)));
+      }
+      function initials(n) {
+        return n
+          .split(" ")
+          .map((x) => x[0])
+          .slice(0, 2)
+          .join("");
+      }
+      function meter(v, kind = "") {
+        return `<div class="meter"><div class="bar"><i class="${kind}" style="width:${v}%"></i></div><b>${v}%</b></div>`;
+      }
+      function decisionTag(status) {
+        return status === "Disetujui"
+          ? "good"
+          : status === "Dikembalikan ke Supervisor"
+            ? "warn"
+            : status === "Ditunda"
+              ? "gray"
+              : "gray";
+      }
+      function supervisorTag(p) {
+        return p.validation === "Terverifikasi"
+          ? "good"
+          : p.validation === "Perlu klarifikasi bukti"
+            ? "warn"
+            : p.validation === "Valid terbatas"
+              ? "warn"
+              : "good";
+      }
+      function renderPeople() {
+        const q = $("searchPeople").value.toLowerCase(),
+          reg = $("peopleRegion").value,
+          co = $("peopleCohort").value;
+        const rows = people.filter(
+          (p) =>
+            (!reg || p.region === reg) &&
+            (!co || p.cohort === co) &&
+            [p.name, p.title, p.target, p.grade, p.supervisorRecommendation]
+              .join(" ")
+              .toLowerCase()
+              .includes(q),
+        );
+        $("peopleBody").innerHTML = rows
+          .map(
+            (p) => `<tr class="click" data-person="${p.name}">
+   <td><div class="person"><div class="avatar">${initials(p.name)}</div><div><b>${p.name}</b><small>${p.grade}</small></div></div></td>
+   <td>Wilayah ${p.region}</td>
+   <td>${p.title}</td>
+   <td><b>${p.target}</b></td>
+   <td>${meter(p.match)}</td>
+   <td>${meter(p.evidence, p.evidence < 60 ? "med" : "")}</td>
+   <td><span class="tag ${supervisorTag(p)}">${p.supervisorRecommendation}</span></td>
+   <td><span class="tag ${decisionTag(p.headDecision)}">${p.headDecision}</span></td>
+ </tr>`,
+          )
+          .join("");
+        document
+          .querySelectorAll("[data-person]")
+          .forEach((r) => (r.onclick = () => openPerson(r.dataset.person)));
+      }
+      function evidenceOverallStatus(p) {
+        const docs = p.evidenceDocs;
+        if (docs.some((d) => d.status === "rejected"))
+          return "Ada bukti tidak valid";
+        if (docs.some((d) => d.status === "resubmit"))
+          return "Valid dengan catatan / tindak lanjut";
+        if (docs.every((d) => d.status === "accepted"))
+          return "Terverifikasi Supervisor";
+        return "Belum lengkap";
+      }
+      function evidenceTag(status) {
+        return status === "accepted"
+          ? "good"
+          : status === "rejected"
+            ? "risk"
+            : status === "resubmit"
+              ? "warn"
+              : "gray";
+      }
+      function renderPersonEvidence() {
+        if (!currentPerson) return;
+        const p = currentPerson;
+        $("drawerEvidence").textContent = p.evidence + "%";
+        $("drawerValidation").textContent = p.validation;
+        $("supervisorName").textContent = p.supervisor;
+        $("supervisorRecommendation").textContent = p.supervisorRecommendation;
+        $("supervisorNote").textContent = p.supervisorNote;
+        $("supervisorEvidenceStatus").textContent = evidenceOverallStatus(p);
+        $("headDecisionStatus").textContent = p.headDecision;
+        $("headDecisionStatus").className =
+          "tag " + decisionTag(p.headDecision);
+        $("headDecisionNote").value = p.headDecisionNote || "";
+        const accepted = p.evidenceDocs.filter(
+          (d) => d.status === "accepted",
+        ).length;
+        $("evidenceReviewSummary").textContent =
+          `${accepted}/${p.evidenceDocs.length} bukti valid`;
+        $("drawerEvidenceList").innerHTML = p.evidenceDocs
+          .map(
+            (d) => `<div class="evidence-item">
+   <div class="evidence-row"><div><h4>${d.title}</h4><div class="evidence-meta">${d.type} · ${d.source}<br>${d.date}</div></div>
+   <span class="tag ${evidenceTag(d.status)}">${evidenceStatusLabel[d.status]}</span></div>
+   <div class="evidence-actions"><button class="btn" data-evidence="${d.id}">Lihat Bukti</button>${d.note ? `<span class="evidence-meta">Catatan Supervisor: ${d.note}</span>` : ""}</div>
+ </div>`,
+          )
+          .join("");
+        document
+          .querySelectorAll("[data-evidence]")
+          .forEach((b) => (b.onclick = () => openEvidence(b.dataset.evidence)));
+        renderPeople();
+      }
+      function openPerson(name) {
+        const p = people.find((x) => x.name === name);
+        if (!p) return;
+        currentPerson = p;
+        $("drawerName").textContent = p.name;
+        $("drawerMeta").textContent =
+          `Wilayah ${p.region} · ${p.grade} · ${p.cohort}`;
+        $("drawerMatch").textContent = p.match + "%";
+        $("drawerEvidence").textContent = p.evidence + "%";
+        $("drawerTitle").textContent = p.title;
+        $("drawerGrade").textContent = `${p.grade} / Wilayah ${p.region}`;
+        $("drawerTarget").textContent = p.target;
+        $("drawerDuration").textContent = p.duration;
+        $("drawerSkills").innerHTML = p.skills
+          .map(
+            (s) =>
+              `<div class="skill"><div class="skill-top"><span>${s[0]}</span><b>${s[1]}%</b></div><div class="skill-track"><i style="width:${s[1]}%"></i></div></div>`,
+          )
+          .join("");
+        $("drawerGaps").innerHTML = p.gaps
+          .map(
+            (s) =>
+              `<div class="skill"><div class="skill-top"><span>${s[0]}</span><b>${s[1]}%</b></div><div class="skill-track"><i class="gap" style="width:${s[1]}%"></i></div></div>`,
+          )
+          .join("");
+        renderPersonEvidence();
+        $("drawer").classList.add("open");
+        $("overlay").classList.add("show");
+      }
+      let currentEvidence = null;
+      function evidencePreviewHtml(d, p) {
+        return `<div class="doc-sheet"><div class="label">${d.type}</div><div class="doc-title">${d.title}</div><div class="evidence-meta">Nama: ${p.name}<br>ID: ${p.grade}-${p.region}-${p.name.replace(/\s/g, "").slice(0, 6).toUpperCase()}<br>Sumber: ${d.source}</div><div class="doc-line"></div><div class="doc-line w80"></div><div class="doc-line w60"></div><div class="doc-line w80"></div><div class="doc-line w45"></div><div class="doc-stamp">EVIDENCE<br>${d.date}</div></div>`;
+      }
+      function openEvidence(id) {
+        if (!currentPerson) return;
+        const d = currentPerson.evidenceDocs.find((x) => x.id === id);
+        if (!d) return;
+        currentEvidence = d;
+        $("evidenceTitle").textContent = d.title;
+        $("evidenceModalMeta").textContent =
+          `${currentPerson.name} · ${d.type}`;
+        $("evidenceSource").textContent = d.source;
+        $("evidenceDate").textContent = d.date;
+        $("evidenceStatus").textContent = evidenceStatusLabel[d.status];
+        $("evidenceLastNote").textContent = d.note || "—";
+        $("reviewHistory").textContent = d.reviewedAt || "—";
+        $("evidencePreview").innerHTML = evidencePreviewHtml(d, currentPerson);
+        $("evidenceModal").classList.add("open");
+        $("evidenceBackdrop").classList.add("show");
+      }
+      function closeEvidence() {
+        currentEvidence = null;
+        $("evidenceModal").classList.remove("open");
+        $("evidenceBackdrop").classList.remove("show");
+      }
+      function applyHeadDecision(status) {
+        if (!currentPerson) return;
+        const note = $("headDecisionNote").value.trim();
+        if (
+          (status === "Dikembalikan ke Supervisor" || status === "Ditunda") &&
+          !note
+        ) {
+          showToast("Tambahkan catatan keputusan terlebih dahulu");
+          $("headDecisionNote").focus();
+          return;
+        }
+        currentPerson.headDecision = status;
+        currentPerson.headDecisionNote = note;
+        renderPersonEvidence();
+        renderSummary();
+        renderTransition();
+        renderDecision();
+        renderUnionValidation();
+        renderApprovals();
+        showToast(
+          status === "Disetujui"
+            ? "Rekomendasi disetujui · Ringkasan diperbarui"
+            : status === "Dikembalikan ke Supervisor"
+              ? "Dikembalikan ke supervisor · Ringkasan diperbarui"
+              : "Keputusan ditunda · Ringkasan diperbarui",
+        );
+      }
+      function fmtRpB(v) {
+        return (
+          "Rp" +
+          v.toLocaleString("id-ID", {
+            minimumFractionDigits: 1,
+            maximumFractionDigits: 1,
+          }) +
+          " M"
+        );
+      }
+      function fmtRpHire(v) {
+        return "Rp" + Math.round(v * 1000000).toLocaleString("id-ID");
+      }
+      function updateEconomics() {
+        econ.hires = +$("hireSlider").value;
+        econ.cost = +$("costSlider").value;
+        econ.program = +$("programSlider").value;
+        const m = metrics();
+        $("hireLabel").textContent = fmtInt(econ.hires);
+        $("costLabel").textContent = fmtRpHire(econ.cost);
+        $("programLabel").textContent = fmtRpB(econ.program);
+        $("programCostCard").textContent = fmtRpB(econ.program);
+        $("grossCard").textContent = fmtRpB(m.gross);
+        $("netCard").textContent = fmtRpB(m.net);
+        $("netCard").style.color = m.net >= 0 ? "var(--teal-d)" : "var(--red)";
+        $("ratioCard").textContent =
+          m.ratio.toLocaleString("id-ID", {
+            minimumFractionDigits: 1,
+            maximumFractionDigits: 1,
+          }) + "×";
+        $("beCard").textContent = fmtInt(m.be);
+        renderSummary();
+        renderDecision();
+        renderApprovals();
+      }
+      function renderDecision() {
+        const m = metrics();
+        const gates = [
+          ["Visibilitas Tenaga Kerja", m.visibility, 95, "%"],
+          ["Keandalan Bukti", m.evidence, 80, "%"],
+          ["Cakupan Penempatan Ulang", m.coverage, 70, "%"],
+          ["Perlindungan Pekerja", m.protection, 100, "%"],
+          ["Kelayakan Ekonomi", m.ratio, 1, "×"],
+          ["Kesiapan Scale-up", m.readiness, 100, "%"],
+        ];
+        $("gateList").innerHTML = gates
+          .map(([n, v, t, u]) => {
+            const pass = v >= t;
+            const display =
+              u === "×"
+                ? v.toLocaleString("id-ID", {
+                    minimumFractionDigits: 1,
+                    maximumFractionDigits: 1,
+                  }) + "×"
+                : pct(v);
+            const target =
+              u === "×"
+                ? "≥1,0×"
+                : n === "Perlindungan Pekerja"
+                  ? "100%"
+                  : "≥" + t + "%";
+            return `<div class="gate"><b>${n}</b><span class="actual">${display}</span><span class="target-v">${target}</span><span class="tag ${pass ? "good" : "warn"}">${pass ? "Lulus" : "Belum"}</span></div>`;
+          })
+          .join("");
+        const all = gates.every(([n, v, t]) => v >= t);
+        const close = m.readiness >= 90;
+        const hc = `Keputusan Head HC: ${m.headDecision.approved}/${m.headDecision.total} disetujui, ${m.headDecision.pending} menunggu.`;
+        if (all) {
+          $("decisionTitle").textContent = "Siap untuk scale-up";
+          $("decisionText").textContent =
+            `Semua gate Hari ke-45 terpenuhi pada skenario saat ini. ${hc}`;
+        } else if (close) {
+          $("decisionTitle").textContent = "Siap bersyarat";
+          $("decisionText").textContent =
+            `Kesenjangan utama masih pada bukti, cakupan penempatan ulang, dan/atau penyelesaian keputusan Head HC. ${hc}`;
+        } else {
+          $("decisionTitle").textContent = "Belum siap scale-up";
+          $("decisionText").textContent =
+            `Prioritaskan validasi bukti, kebutuhan peran, dan penyelesaian keputusan Head HC sebelum Hari ke-45. ${hc}`;
+        }
+      }
+
+      const unionValidations = [
+        {
+          id: "principle",
+          label: "Redeployment-first & menghindari PHK massal",
+          status: "approved",
+          detail: "Disepakati",
+        },
+        {
+          id: "appeal",
+          label: "Validasi manusia & jalur banding",
+          status: "approved",
+          detail: "Disepakati",
+        },
+        {
+          id: "individual",
+          label: "Mekanisme rekomendasi tingkat individu",
+          status: "draft",
+          detail: "Belum diajukan",
+        },
+      ];
+      function renderUnionValidation() {
+        const approved = unionValidations.filter(
+          (x) => x.status === "approved",
+        ).length;
+        const pending = unionValidations.filter(
+          (x) => x.status === "pending",
+        ).length;
+        const draft = unionValidations.filter(
+          (x) => x.status === "draft",
+        ).length;
+        $("unionSummary").textContent =
+          `${approved}/3 disepakati${pending ? ` · ${pending} menunggu` : ""}`;
+        $("unionGrid").innerHTML = unionValidations
+          .map((x) => {
+            const s = approvalStatusMeta(x.status);
+            return `<div class="union-item"><b>${x.label}</b><small>${x.detail}${x.submittedAt ? ` · ${x.submittedAt}` : ""}</small><span class="approval-status ${s.cls}">${s.label}</span></div>`;
+          })
+          .join("");
+        const btn = $("submitUnionAgenda");
+        btn.disabled = draft === 0;
+        btn.textContent = draft
+          ? "Ajukan Agenda Final"
+          : "Agenda Final Sudah Diajukan";
+        $("unionActionNote").textContent = draft
+          ? "1 isu masih perlu dibawa ke validasi Serikat Pekerja."
+          : "Menunggu hasil validasi Serikat Pekerja.";
+      }
+      function submitUnionAgenda() {
+        const now = new Date().toLocaleString("id-ID", {
+          day: "2-digit",
+          month: "short",
+          hour: "2-digit",
+          minute: "2-digit",
+        });
+        let changed = 0;
+        unionValidations.forEach((x) => {
+          if (x.status === "draft") {
+            x.status = "pending";
+            x.detail = "Menunggu validasi Serikat Pekerja";
+            x.submittedAt = now;
+            changed++;
+          }
+        });
+        renderUnionValidation();
+        showToast(changed ? "Agenda final diajukan" : "Tidak ada agenda baru");
+      }
+
+      const boardApprovals = [
+        {
+          id: "architecture",
+          label: "Arsitektur Kapabilitas sebagai overlay",
+          status: "approved",
+          detail: "Disetujui · Mandat fondasi solusi",
+        },
+        {
+          id: "pilot",
+          label: "Field ABCD sebagai proyek percontohan",
+          status: "approved",
+          detail: "Disetujui · Pilot 45 hari",
+        },
+        {
+          id: "redeployment",
+          label: "Prioritas penempatan ulang karyawan",
+          status: "approved",
+          detail: "Disetujui · Prinsip redeployment-first",
+        },
+        {
+          id: "reskilling",
+          label: "Reskilling berbasis kesenjangan kapabilitas",
+          status: "approved",
+          detail: "Disetujui · Intervensi berbasis gap",
+        },
+        {
+          id: "union",
+          label: "Validasi bersama karyawan & Serikat Pekerja",
+          status: "pending",
+          detail: "Menunggu keputusan Direksi",
+        },
+        {
+          id: "day45",
+          label: "Evaluasi kelayakan pada Hari ke-45",
+          status: "draft",
+          detail: "Belum diajukan",
+        },
+      ];
+      let boardSubmissionAt = null;
+
+      function approvalStatusMeta(status) {
+        if (status === "approved")
+          return { label: "Disetujui", cls: "approved" };
+        if (status === "pending")
+          return { label: "Menunggu Persetujuan", cls: "pending" };
+        if (status === "revision")
+          return { label: "Perlu Revisi", cls: "revision" };
+        return { label: "Belum Diajukan", cls: "draft" };
+      }
+
+      function boardSubmissionReadiness() {
+        const m = metrics();
+        const allCoreGates =
+          m.visibility >= 95 &&
+          m.evidence >= 80 &&
+          m.coverage >= 70 &&
+          m.protection >= 100 &&
+          m.ratio >= 1;
+        if (m.readiness >= 100 && allCoreGates)
+          return {
+            level: "ready",
+            label: "Ajukan Persetujuan Scale-up",
+            note: "Seluruh gate utama terpenuhi. Paket dapat diajukan sebagai keputusan scale-up.",
+          };
+        if (m.readiness >= 90)
+          return {
+            level: "conditional",
+            label: "Ajukan Persetujuan Bersyarat",
+            note: "Kesiapan mendekati target. Paket dapat diajukan dengan syarat penyelesaian gap yang masih terbuka.",
+          };
+        return {
+          level: "blocked",
+          label: "Belum Dapat Diajukan",
+          note: `Kesiapan scale-up ${Math.round(m.readiness)}%. Selesaikan gap utama sebelum paket keputusan Hari ke-45 diajukan.`,
+        };
+      }
+
+      function renderApprovals() {
+        const counts = boardApprovals.reduce((a, x) => {
+          a[x.status] = (a[x.status] || 0) + 1;
+          return a;
+        }, {});
+        $("approvalList").innerHTML = boardApprovals
+          .map((a) => {
+            const s = approvalStatusMeta(a.status);
+            return `<div class="approval">
+     <div class="approval-copy">
+       <b>${a.label}</b>
+       <small>${a.detail}${a.submittedAt ? ` · Diajukan ${a.submittedAt}` : ""}</small>
+     </div>
+     <span class="approval-status ${s.cls}">${s.label}</span>
+   </div>`;
+          })
+          .join("");
+
+        const readiness = boardSubmissionReadiness();
+        const remaining = boardApprovals.filter(
+          (a) => a.status === "draft" || a.status === "revision",
+        ).length;
+        const pending = counts.pending || 0;
+        const approved = counts.approved || 0;
+
+        $("approvalSummaryTitle").textContent =
+          `${approved}/6 disetujui Direksi`;
+        $("approvalSummaryMeta").textContent = pending
+          ? `${pending} menunggu · ${remaining} belum final`
+          : remaining
+            ? `${remaining} belum diajukan`
+            : "Seluruh item telah diajukan";
+
+        const btn = $("submitBoardApproval");
+        btn.textContent =
+          remaining === 0 ? "Seluruh Item Telah Diajukan" : readiness.label;
+        btn.disabled = readiness.level === "blocked" || remaining === 0;
+        $("approvalActionNote").textContent =
+          remaining === 0
+            ? boardSubmissionAt
+              ? `Paket terakhir diajukan ${boardSubmissionAt}. Head HC menunggu keputusan formal Direksi.`
+              : "Head HC menunggu keputusan formal Direksi."
+            : readiness.note;
+      }
+
+      function submitBoardApproval() {
+        const readiness = boardSubmissionReadiness();
+        if (readiness.level === "blocked") {
+          showToast("Paket belum dapat diajukan");
+          return;
+        }
+        const now = new Date().toLocaleString("id-ID", {
+          day: "2-digit",
+          month: "short",
+          hour: "2-digit",
+          minute: "2-digit",
+        });
+        let changed = 0;
+        boardApprovals.forEach((a) => {
+          if (a.status === "draft" || a.status === "revision") {
+            a.status = "pending";
+            a.detail =
+              readiness.level === "ready"
+                ? "Diajukan untuk persetujuan scale-up"
+                : "Diajukan sebagai persetujuan bersyarat";
+            a.submittedAt = now;
+            changed++;
+          }
+        });
+        boardSubmissionAt = now;
+        renderApprovals();
+        showToast(
+          changed
+            ? `${changed} item diajukan ke Direksi`
+            : "Tidak ada item baru untuk diajukan",
+        );
+      }
+      function go(id) {
+        document
+          .querySelectorAll(".screen")
+          .forEach((s) => s.classList.toggle("active", s.id === id));
+        document
+          .querySelectorAll("#nav button")
+          .forEach((b) =>
+            b.classList.toggle("active", b.dataset.screen === id),
+          );
+        $("contextTitle").textContent = contextNames[id];
+        $("sidebar").classList.remove("open");
+        window.scrollTo({ top: 0, behavior: "smooth" });
+      }
+      function refresh() {
+        const t = nowText();
+        $("syncSide").textContent = t;
+        $("syncMain").textContent = t;
+        renderAll();
+        showToast("Data diperbarui");
+      }
+      function renderAll() {
+        renderSummary();
+        renderIdentity();
+        renderArchitecture();
+        renderExposure();
+        renderTransition();
+        renderPeople();
+        updateEconomics();
+        renderDecision();
+        renderUnionValidation();
+        renderApprovals();
+      }
+      function showToast(text) {
+        $("toast").textContent = text;
+        $("toast").classList.add("show");
+        setTimeout(() => $("toast").classList.remove("show"), 1500);
+      }
+      let currentPerson = null;
+      function closeDrawer() {
+        $("drawer").classList.remove("open");
+        $("overlay").classList.remove("show");
+      }
+      $("nav")
+        .querySelectorAll("button")
+        .forEach((b) => (b.onclick = () => go(b.dataset.screen)));
+      $("menuBtn").onclick = () => $("sidebar").classList.toggle("open");
+      $("regionSelect").onchange = (e) => {
+        selectedRegion = e.target.value;
+        renderSummary();
+        renderIdentity();
+        renderExposure();
+        renderTransition();
+        renderDecision();
+        renderApprovals();
+      };
+      $("refreshBtn").onclick = refresh;
+      $("searchPeople").oninput = renderPeople;
+      $("peopleRegion").onchange = renderPeople;
+      $("peopleCohort").onchange = renderPeople;
+      ["hireSlider", "costSlider", "programSlider"].forEach(
+        (id) => ($(id).oninput = updateEconomics),
+      );
+      $("closeDrawer").onclick = closeDrawer;
+      $("overlay").onclick = closeDrawer;
+      $("closeEvidence").onclick = closeEvidence;
+      $("closeEvidenceAction").onclick = closeEvidence;
+      $("evidenceBackdrop").onclick = closeEvidence;
+      $("approveDecision").onclick = () => applyHeadDecision("Disetujui");
+      $("returnDecision").onclick = () =>
+        applyHeadDecision("Dikembalikan ke Supervisor");
+      $("holdDecision").onclick = () => applyHeadDecision("Ditunda");
+      $("goIdentityBtn").onclick = () => go("identity");
+      $("identityStatusFilter").onchange = (e) => {
+        identityFilter = e.target.value;
+        renderIdentity();
+      };
+      $("identityExceptionsBtn").onclick = () => {
+        identityFilter = "review";
+        $("identityStatusFilter").value = "review";
+        renderIdentity();
+      };
+      $("identityResetBtn").onclick = () => {
+        identityFilter = "ALL";
+        $("identityStatusFilter").value = "ALL";
+        renderIdentity();
+      };
+      $("identityExportBtn").onclick = exportIdentityExceptions;
+      $("goGapBtn").onclick = () => go("transition");
+      $("goEconBtn").onclick = () => go("economics");
+      $("submitUnionAgenda").onclick = submitUnionAgenda;
+      $("submitBoardApproval").onclick = submitBoardApproval;
+      document.addEventListener("keydown", (e) => {
+        if (e.key === "Escape") {
+          if ($("evidenceModal").classList.contains("open")) closeEvidence();
+          else closeDrawer();
+        }
+      });
+      refresh();
+    </script>
+  </body>
+</html>
